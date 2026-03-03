@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Detail Dashboard Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #4f46e5;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-overlay: #0f172a;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --tab-default-border: #d9d9d9;
+      --status-success-bg: #d2f0df;
+      --status-success-text: #11552f;
+      --metric-green: #16a34a;
+      --chart-bar: #0f172a;
+      --chart-target: #6366f1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+    }
+    h1, h2, h3, p { margin: 0; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail {
+      border-right: 1px solid var(--border-default);
+      background: var(--bg-surface);
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link {
+      display: block;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); color: var(--text-primary); }
+
+    .page { max-width: 1480px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tiny { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .tab {
+      border: 1px solid var(--tab-default-border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab.settings { background: var(--bg-subtle); }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 8px;
+      padding: 2px 8px;
+      background: var(--status-success-bg);
+      color: var(--status-success-text);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .btn {
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      background: #fff;
+      color: var(--text-secondary);
+    }
+    .pill {
+      display: inline-flex;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: var(--bg-subtle);
+      font-size: 12px;
+      color: var(--text-primary);
+      margin-right: 6px;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .pill.link { color: var(--text-link); }
+    .atom {
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      display: grid;
+      gap: 8px;
+    }
+    .atom .name { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; }
+    .metric-tile {
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      background: var(--bg-subtle);
+      padding: 12px;
+    }
+    .metric-tile .label { font-size: 13px; color: var(--text-secondary); }
+    .metric-tile .value { font-size: 30px; font-weight: 700; margin-top: 4px; }
+    .metric-tile .delta { font-size: 12px; color: var(--metric-green); margin-top: 4px; }
+    .k { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+    .v { font-size: 14px; font-weight: 500; }
+    .summary-box { border: 1px solid var(--border-default); border-radius: 12px; padding: 14px; display: grid; gap: 10px; }
+    .progress-wrap { border: 1px solid var(--border-default); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
+    .bar { height: 12px; border-radius: 999px; background: #e5e7eb; overflow: hidden; }
+    .bar > span { display:block; height:100%; width:65%; background: var(--chart-bar); border-radius: 999px; }
+    .pace-note {
+      border-radius: 14px;
+      background: var(--bg-subtle);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-style: italic;
+    }
+    .burn-chip {
+      border-radius: 8px;
+      background: #fbbf24;
+      padding: 8px 16px 8px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .burn-chip .meta { color: var(--text-secondary); }
+    .chart-block {
+      border-top: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-default);
+      padding: 14px 0;
+      margin-top: 12px;
+    }
+    .chart-grid { display: grid; gap: 8px; margin-bottom: 12px; }
+    .grid-line { display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; }
+    .grid-line .y { color: var(--text-muted); font-size: 13px; font-weight: 500; }
+    .grid-line .line { height: 1px; border-top: 1px dashed #cfd7e3; }
+    .grid-line.target .line { border-top: 2px dashed var(--chart-target); }
+    .chart-bars { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 14px; padding: 0 10px 0 50px; align-items: end; }
+    .chart-col { display: grid; justify-items: center; gap: 8px; }
+    .stick { width: 16px; border-radius: 8px; background: var(--chart-bar); }
+    .date { font-size: 13px; color: #94a3b8; font-weight: 500; }
+    .io-card { margin-top: 12px; border-radius: 16px; background: var(--bg-subtle); padding: 16px; border: 1px solid #e7edf5; }
+    .io-head { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: 14px; }
+    .io-table { width: 100%; border-collapse: collapse; }
+    .io-table th, .io-table td { border: 0; padding: 8px 6px; text-align: left; }
+    .io-table th { font-size: 13px; color: var(--text-secondary); font-weight: 400; }
+    .io-table td { font-size: 14px; font-weight: 500; }
+    .code { font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace; color: var(--text-secondary); }
+    .status-pill { display: inline-flex; padding: 3px 10px; border-radius: 8px; font-size: 14px; font-weight: 500; }
+    .status-pill.active { background: #ccead7; color: #11552f; }
+    .status-pill.processing { color: #475569; background: transparent; padding: 0; }
+    .aside-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .creative { border:1px solid var(--border-default); border-radius: 12px; padding: 12px; }
+    .creative-card { border:1px solid var(--border-default); border-radius: 10px; background:#fff; padding: 10px; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); }
+    .timeline { border:1px solid var(--border-default); border-radius: 12px; padding: 12px; display:grid; gap: 10px; }
+    .event { border-left: 2px solid var(--border-default); padding-left: 10px; }
+    .event strong { font-size: 13px; display:block; margin-bottom: 2px; }
+    .event span { font-size: 12px; color: var(--text-secondary); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { background: var(--bg-subtle); color: var(--text-secondary); font-weight: 600; }
+    @media (max-width: 1240px) { .grid-5, .grid-3, .aside-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 980px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+      .grid-2, .grid-3, .grid-5, .aside-grid { grid-template-columns: 1fr; }
+      .chart-bars { grid-template-columns: repeat(5, minmax(0, 1fr)); padding-left: 0; }
+      .grid-line { grid-template-columns: 30px 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link active" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#overview">Overview + Schedule</a>
+        <a class="rail-link" href="#funnel-metrics">Funnel Metrics</a>
+        <a class="rail-link" href="#budget-spend">Budget &amp; Spend</a>
+        <a class="rail-link" href="#associated-io">Associated IO Details</a>
+        <a class="rail-link" href="#creative-changelog">Creative + Changelog</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - Detail Dashboard Reference</h1>
+          <p class="sub">Source: Figma nodes `221:5500` + `232:20000` merged into one dashboard reference.</p>
+          <p class="tiny">Rebuilt with atomic breakdown (atoms, molecules, composed sections) and a spend chart aligned to the provided graph shape and labels.</p>
+        </section>
+
+        <section class="panel" id="atoms">
+          <h2 class="section-title">Atoms</h2>
+          <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source nodes: <code>226:18254</code>, <code>232:20000</code>, <code>243:21342</code>, <code>226:18637</code></p>
+          <div class="grid-5" style="margin-top:10px;">
+            <div class="atom"><div class="name">Status Badge</div><div><span class="status">Active</span></div></div>
+            <div class="atom"><div class="name">Filter Tab</div><div><span class="tab">Today <i data-lucide="chevron-down" style="width:12px;height:12px;vertical-align:middle;"></i></span></div></div>
+            <div class="atom"><div class="name">Data Pill</div><div><span class="pill">46 - Acorns Chrome</span></div></div>
+            <div class="atom"><div class="name">Link Pill</div><div><span class="pill link">User Visits: Ebay.com</span></div></div>
+            <div class="atom"><div class="name">Metric Delta</div><div style="color:var(--metric-green); font-size:12px;">↗ +5.7%</div></div>
+          </div>
+          <div class="atom" style="margin-top:10px;">
+            <div class="name">Burn Rate Chip</div>
+            <div><span class="burn-chip"><span>High Burn Rate</span><span class="meta">$4.2k per day</span></span></div>
+          </div>
+        </section>
+
+        <section class="panel" id="molecules">
+          <h2 class="section-title">Molecules</h2>
+          <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source nodes: <code>226:18254</code>, <code>232:20000</code>, <code>226:18637</code></p>
+          <div class="grid-3" style="margin-top:10px;">
+            <div class="metric-tile"><div class="label"><i data-lucide="eye" style="width:14px;height:14px;"></i> Impressions</div><div class="value">--</div><div class="delta">↗ --</div></div>
+            <div class="progress-wrap"><div class="row"><span class="v">$8800 Spent <span class="k">(65% Spent)</span></span><span class="k">$17,000</span></div><div class="bar"><span></span></div></div>
+            <div class="atom"><div class="name">IO Row</div><div>Q4 Retail Seasonal Push</div><div class="code">BILL-2026-105</div><div><span class="status-pill active">Active</span></div></div>
+          </div>
+          <ul class="tiny" style="margin-top:10px;">
+            <li>Overview summary molecule (target segment, placement, app ID, trigger, cap)</li>
+            <li>Schedule summary molecule (launch/end/time remaining)</li>
+            <li>Funnel metric tile molecule (icon + label + value + trend)</li>
+            <li>Budget and spend molecule (totals + progress + pacing note)</li>
+            <li>Associated IO details molecule (description, billing ID, status, amount)</li>
+          </ul>
+        </section>
+
+        <section class="panel" id="compositions">
+          <h2 class="section-title">Compositions</h2>
+          <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source nodes: <code>226:18254</code>, <code>232:20000</code>, <code>243:21342</code>, <code>226:18637</code></p>
+          <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+            <div style="font-weight:600; margin-bottom:8px;">Detail Dashboard Composition</div>
+            <div style="display:grid; gap:8px;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap;"><span class="tab">Holiday Shopping Campaign</span><span class="status">Active</span></div>
+              <div class="grid-3">
+                <div class="metric-tile"><div class="label"><i class="iconoir iconoir-eye"></i> Impressions</div><div class="value">--</div></div>
+                <div class="progress-wrap"><div class="row"><span class="v">$8800 Spent</span><span class="k">$17,000</span></div><div class="bar"><span></span></div></div>
+                <div><span class="burn-chip"><span>High Burn Rate</span><span class="meta">$4.2k per day</span></span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="row">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span class="tab">All Campaigns</span>
+              <span class="tab">Holiday Shopping Campaign</span>
+              <span class="tab">+</span>
+            </div>
+            <span class="tab settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span>
+          </div>
+          <div class="row" style="margin-top:12px;">
+            <h2 style="display:flex; align-items:center; gap:10px;">Holiday Shopping Campaign <span class="status">Active</span></h2>
+            <button class="btn">Edit Campaign</button>
+          </div>
+        </section>
+
+        <section class="grid-2" id="overview">
+          <div class="summary-box">
+            <h3 class="section-title">Overview</h3>
+            <div class="grid-3">
+              <div><div class="k">Target Segment</div><div class="v"><span class="pill">Really Long Segment Name (80 users)</span></div></div>
+              <div><div class="k">Placement Type</div><div class="v"><span class="pill link">Action Rewards ($5)</span></div></div>
+              <div><div class="k">App ID</div><div class="v"><span class="pill">46 - Acorns Chrome</span> <span class="pill">511</span></div></div>
+              <div><div class="k">Trigger Condition</div><div class="v"><span class="pill link">User Visits: Ebay.com</span></div></div>
+              <div><div class="k">Frequency Cap</div><div class="v"><span class="pill link">Max: 1 per day</span></div></div>
+            </div>
+          </div>
+          <div class="summary-box">
+            <h3 class="section-title">Schedule</h3>
+            <div class="grid-3">
+              <div><div class="k">Launch Date</div><div class="v">Dec 31, 2026<br>12:00 PT</div></div>
+              <div><div class="k">End Date</div><div class="v">Dec 31, 2027<br>12:00 PT</div></div>
+              <div><div class="k">Time Remaining</div><div class="v">1 Year, 4h</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="funnel-metrics">
+          <div class="row">
+            <h2 class="section-title">Funnel Metrics</h2>
+            <span class="tab">Today <i class="iconoir iconoir-nav-arrow-down"></i></span>
+          </div>
+          <div class="grid-5" style="margin-top:12px;">
+            <div class="metric-tile"><div class="label"><i class="iconoir iconoir-eye"></i> Impressions</div><div class="value">--</div><div class="delta">↗ --</div></div>
+            <div class="metric-tile"><div class="label"><i class="iconoir iconoir-click"></i> Clicks</div><div class="value">--</div><div class="delta">↗ --</div></div>
+            <div class="metric-tile"><div class="label"><i class="iconoir iconoir-cart"></i> Conversions</div><div class="value">--</div><div class="delta">↗ --</div></div>
+            <div class="metric-tile"><div class="label"><i class="iconoir iconoir-dollar-circle"></i> Net Sale Amount</div><div class="value">--</div><div class="delta">↗ --</div></div>
+            <div class="metric-tile"><div class="label"><i class="iconoir iconoir-star"></i> ROAS</div><div class="value">--</div><div class="delta">↗ --</div></div>
+          </div>
+        </section>
+
+        <section class="panel" id="budget-spend">
+          <h2 class="section-title" style="margin-bottom:10px;">Budget and Spend</h2>
+          <div class="grid-5">
+            <div><div class="k">Planned Budget (IO)</div><div class="v">$46,000 <span class="k">(17%)</span></div></div>
+            <div><div class="k">Planned Budget (Campaign)</div><div class="v">$17,000</div></div>
+            <div><div class="k">Planned Daily Spend</div><div class="v">$6,000</div></div>
+            <div><div class="k">Avg Daily Spend</div><div class="v">$7,200</div></div>
+            <div><div class="k">Actual Daily Spend</div><div class="v">$7,000 <span style="font-size:12px; color:var(--metric-green);">↗ +5.7%</span></div></div>
+          </div>
+
+          <div class="progress-wrap" style="margin-top:12px;">
+            <div class="row"><span class="v">$8800 Spent <span class="k">(65% Spent)</span></span><span class="k">$17,000</span></div>
+            <div class="bar"><span></span></div>
+          </div>
+
+          <div class="pace-note" style="margin-top:12px;">
+            <i class="iconoir iconoir-warning-triangle"></i>
+            Campaign is pacing 12% ahead of projected daily spend
+          </div>
+          <div style="margin-top:10px;">
+            <span class="burn-chip"><span>High Burn Rate</span><span class="meta">$4.2k per day</span></span>
+          </div>
+
+          <div class="chart-block">
+            <div class="chart-grid">
+              <div class="grid-line"><span class="y">$10k</span><span class="line"></span></div>
+              <div class="grid-line"><span class="y">$8k</span><span class="line"></span></div>
+              <div class="grid-line target"><span class="y">$6k</span><span class="line"></span></div>
+              <div class="grid-line"><span class="y">$4k</span><span class="line"></span></div>
+            </div>
+            <div class="chart-bars">
+              <div class="chart-col"><div class="stick" style="height:62px;"></div><div class="date">2/17</div></div>
+              <div class="chart-col"><div class="stick" style="height:93px;"></div><div class="date">2/18</div></div>
+              <div class="chart-col"><div class="stick" style="height:68px;"></div><div class="date">2/21</div></div>
+              <div class="chart-col"><div class="stick" style="height:120px;"></div><div class="date">2/19</div></div>
+              <div class="chart-col"><div class="stick" style="height:68px;"></div><div class="date">2/21</div></div>
+              <div class="chart-col"><div class="stick" style="height:102px;"></div><div class="date">2/20</div></div>
+              <div class="chart-col"><div class="stick" style="height:62px;"></div><div class="date">2/21</div></div>
+              <div class="chart-col"><div class="stick" style="height:97px;"></div><div class="date">2/22</div></div>
+              <div class="chart-col"><div class="stick" style="height:28px;"></div><div class="date">2/23</div></div>
+              <div class="chart-col"><div class="stick" style="height:62px;"></div><div class="date">2/24</div></div>
+            </div>
+          </div>
+
+          <div class="io-card" id="associated-io">
+            <div class="io-head">Associated IO Details</div>
+            <table class="io-table">
+              <thead>
+                <tr><th>Description</th><th>Billing ID</th><th>Status</th><th>Amount</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Q4 Retail Seasonal Push</td>
+                  <td class="code">BILL-2026-105</td>
+                  <td><span class="status-pill active">Active</span></td>
+                  <td>$46,000,000</td>
+                </tr>
+                <tr>
+                  <td>Q1 Retail Follow Up</td>
+                  <td class="code">BILL-2026-102</td>
+                  <td><span class="status-pill processing">Processing</span></td>
+                  <td>$18,000,000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="aside-grid" id="creative-changelog">
+          <div class="creative">
+            <h2 class="section-title" style="margin-bottom:10px;">Creative</h2>
+            <div class="creative-card">
+              <div style="color:#65a30d; font-weight:600;">acorns</div>
+              <div style="height:1px; background:var(--border-default); margin:8px 0;"></div>
+              <div style="font-size:29px; font-weight:700; color:#0f766e;">Earn an Extra $5 Back</div>
+              <div style="font-size:12px; color:var(--text-secondary); margin:6px 0 10px;">When you activate &amp; purchase</div>
+              <div style="text-align:center; font-size:13px; margin-bottom:8px;">Get up to xX.XX% cash back</div>
+              <div style="text-align:center;"><button class="btn" style="border-radius:999px; padding:6px 14px; background:#32777b; color:#fff; border-color:transparent;">Activate</button></div>
+            </div>
+          </div>
+          <div class="timeline">
+            <h2 class="section-title">Changelog</h2>
+            <div class="event"><strong>Schedule adjusted</strong><span>Nov 10, 11:11AM by Ian Miller</span></div>
+            <div class="event"><strong>Schedule adjusted</strong><span>Nov 9, 11:11AM by Ian Miller</span></div>
+            <div class="event"><strong>Campaign Created</strong><span>Nov 6, 10:45AM by Kace Layton</span></div>
+            <div class="event"><strong>Creator</strong><span>Kace Layton • Created Nov 6, 10:45AM</span></div>
+          </div>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead><tr><th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th></tr></thead>
+            <tbody>
+              <tr><td>Header Tabs + Status + Edit CTA</td><td>Yes</td><td>Yes</td><td>Campaign selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Overview/Schedule Summary Cards</td><td>Yes</td><td>Yes</td><td>Expanded</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Date Filter Dropdown</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Funnel Metric Tiles</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>N/A</td><td>Loading/empty</td></tr>
+              <tr><td>Budget &amp; Spend Progress + Pace Note</td><td>Yes</td><td>Yes</td><td>Progress updated</td><td>N/A</td><td>N/A</td><td>Over-budget</td></tr>
+              <tr><td>High Burn Rate Chip</td><td>Yes</td><td>Yes</td><td>Threshold reached</td><td>N/A</td><td>N/A</td><td>Critical pacing</td></tr>
+              <tr><td>Daily Spend Mini-Chart</td><td>Yes</td><td>Yes</td><td>Day selected</td><td>N/A</td><td>N/A</td><td>Anomaly high/low</td></tr>
+              <tr><td>Associated IO Details Table</td><td>Yes</td><td>Row hover</td><td>Status highlighted</td><td>N/A</td><td>N/A</td><td>Billing mismatch</td></tr>
+              <tr><td>Creative Panel + CTA</td><td>Yes</td><td>Yes</td><td>CTA pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Changelog Timeline</td><td>Yes</td><td>Yes</td><td>Entry selected</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

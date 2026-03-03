@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Template Editor Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-danger: #dc2626;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-overlay: #0f172a;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --tab-default-border: #d9d9d9;
+      --input-ring: rgba(99, 102, 241, 0.2);
+      --preview-green: #74c947;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text-primary); background: var(--bg-page); }
+    h1, h2, p { margin: 0; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail { border-right: 1px solid var(--border-default); background: var(--bg-surface); padding: 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link { display: block; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-surface); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); color: var(--text-primary); }
+    .page { max-width: 1440px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tiny { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .stack { display: grid; gap: 10px; }
+    .state-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+    .label { min-width: 88px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; font-weight: 500; }
+    .tab { border: 1px solid var(--tab-default-border); border-radius: 8px; padding: 8px 10px; background: #fff; color: var(--text-primary); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+    .tab.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .settings { background: var(--bg-subtle); }
+    .field-wrap { display: grid; gap: 4px; width: 100%; }
+    .label-row { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+    .label-row .req { color: var(--text-danger); }
+    .input, .select, .textarea {
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+    .input, .select {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .textarea { min-height: 214px; width: 100%; }
+    .textarea.code {
+      font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+      line-height: 1.4;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+    .focus { border-color: var(--border-focus) !important; box-shadow: 0 0 0 3px var(--input-ring); }
+    .error { border-color: var(--text-danger) !important; color: var(--text-danger); }
+    .placeholder { color: var(--text-muted); }
+    .btn { border-radius: 8px; border: 1px solid var(--border-strong); padding: 10px 14px; font-size: 14px; font-weight: 500; background: #fff; color: var(--text-secondary); }
+    .btn.subtle { border-color: transparent; background: var(--bg-subtle); color: var(--text-primary); }
+    .btn.primary { border-color: transparent; background: var(--bg-overlay); color: #fff; display: inline-flex; align-items: center; gap: 8px; }
+    .preview-card { width: 282px; border-radius: 16px; background: #fff; box-shadow: 0 15px 30px rgba(0,0,0,.25); padding: 14px 16px; border: 1px solid var(--border-default); }
+    .preview-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+    .preview-logo { color: #65a30d; font-size: 36px; font-weight: 600; margin: 6px 0; }
+    .merchant { width: 66px; height: 66px; border-radius: 999px; background: #0a5ad8; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 10px auto 6px; box-shadow: 0 0 15px rgba(0,0,0,.25); }
+    .preview-btn { background: var(--preview-green); color: white; border-radius: 999px; border: 0; padding: 8px 22px; font-weight: 600; font-size: 13px; margin-top: 10px; }
+    .preview-meta { display: flex; justify-content: center; gap: 10px; color: #475569; font-size: 12px; margin-top: 14px; }
+    .footer { border: 1px solid var(--border-default); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .step { text-align: right; font-size: 14px; font-weight: 500; }
+    .step small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { background: var(--bg-subtle); color: var(--text-secondary); font-weight: 600; }
+    @media (max-width: 1180px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+      .preview-card { width: 100%; max-width: 360px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link active" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#template-name">Template Name</a>
+        <a class="rail-link" href="#base-template">Base Template</a>
+        <a class="rail-link" href="#html-editor">HTML Editor</a>
+        <a class="rail-link" href="#live-preview">Live Preview</a>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - Template Editor Reference</h1>
+          <p class="sub">Source: Figma node `82:7157` (Update messaging - template editor variant).</p>
+          <p class="tiny">Documents the name/save flow, base template selector, HTML editor payload, preview card, and step footer controls.</p>
+        </section>
+
+        <section class="grid">
+          <div class="panel">
+            <h2>Top Tabs + Settings</h2>
+            <div class="state-row"><span class="label">Default</span><span class="tab">All Campaigns</span><span class="tab">New Campaign</span><span class="tab">+</span><span class="tab settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            <div class="state-row"><span class="label">Focus</span><span class="tab focus">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+          </div>
+          <div class="panel">
+            <h2>Step Footer</h2>
+            <div class="footer">
+              <button class="btn">Cancel</button>
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div class="step">Step 3 of 6<small>Next Step: Scheduling &amp; Distribution</small></div>
+                <button class="btn primary">Next <i class="iconoir iconoir-nav-arrow-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <div class="panel stack" id="template-name">
+            <h2>Name New Template + Save</h2>
+            <div class="field-wrap">
+              <div class="label-row">Name New Template <span class="req">*</span></div>
+              <div style="display:grid; grid-template-columns: 1fr auto; gap:12px;">
+                <div class="input placeholder">Enter multiline text...</div>
+                <button class="btn subtle">Save Template</button>
+              </div>
+            </div>
+            <div class="state-row"><span class="label">Focus</span><div class="input focus" style="min-width:360px;">Q2 Boosted Offer - Segment A</div></div>
+            <div class="state-row"><span class="label">Error</span><div class="input error" style="min-width:360px;">Template name is required</div></div>
+            <div class="state-row"><span class="label">Disabled</span><button class="btn subtle" style="opacity:.5;">Save Template</button></div>
+          </div>
+
+          <div class="panel stack" id="base-template">
+            <h2>Base Template Selector</h2>
+            <div class="field-wrap">
+              <div class="label-row">Base Template <span class="req">*</span></div>
+              <div class="select">EMA/Boosted Offer/Default <span><i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            </div>
+            <div class="state-row"><span class="label">Focus</span><div class="select focus" style="min-width:360px;">EMA/Boosted Offer/Default <span><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+            <div class="state-row"><span class="label">Error</span><div class="select error" style="min-width:360px;">Select a base template <span><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <div class="panel stack" id="html-editor">
+            <h2>HTML Editor</h2>
+            <div class="textarea code">&lt;div style="font-family: sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 400px;"&gt;
+  &lt;h2 style="color: #4f46e5; margin-top: 0;"&gt;{var.1}!&lt;/h2&gt;
+  &lt;p style="color: #475569;"&gt;Hello,&lt;/p&gt;
+  &lt;p style="color: #475569;"&gt;Here is a special discount just for you.&lt;/p&gt;
+  &lt;a href="#" style="display:inline-block;background-color:#4f46e5;color:white;padding:10px 20px;border-radius:6px;"&gt;Claim Offer&lt;/a&gt;
+&lt;/div&gt;</div>
+            <div class="state-row"><span class="label">Focus</span><div class="textarea code focus" style="min-width:100%;">&lt;!-- editing HTML payload --&gt;
+&lt;div&gt;...&lt;/div&gt;</div></div>
+            <div class="state-row"><span class="label">Error</span><div class="textarea code error" style="min-width:100%;">Malformed HTML: unclosed tag near line 4</div></div>
+          </div>
+
+          <div class="panel stack" id="live-preview">
+            <h2>Live Preview</h2>
+            <div class="preview-card">
+              <div class="preview-top"><span>Live preview</span><span>... Activate &amp; Close</span></div>
+              <div class="preview-logo">acorns</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">Limited time offer</div>
+              <div class="merchant">✳</div>
+              <div style="text-align:center; margin-top:8px; font-size:14px;">Walmart</div>
+              <div style="font-size:33px; text-align:center; margin-top:8px; line-height:1.2; font-weight:600;">Get up to 4% invested into your Acorns account</div>
+              <div style="text-align:center;"><button class="preview-btn">Activate</button></div>
+              <div style="text-align:center; margin-top:10px; font-size:14px; color:#52525b;">Exclusions Apply <i class="iconoir iconoir-nav-arrow-down"></i></div>
+              <div class="preview-meta"><span>Offer Details &amp; Terms</span><span>|</span><span>Dismiss</span></div>
+            </div>
+            <div class="state-row"><span class="label">CTA</span><button class="preview-btn">Call to Action</button></div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="panel" id="atoms">
+            <h2>Atoms</h2>
+            <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>82:7157</code></p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;">
+              <span class="tab active">Update Messaging</span>
+              <input type="text" value="Name New Template" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              <button class="btn">Save Template</button>
+              <span><i data-lucide="chevron-down" style="width:14px;height:14px;"></i></span>
+            </div>
+            <ul class="tiny">
+              <li>Template-name input atom</li>
+              <li>Save-template button atom</li>
+              <li>Base-template select + chevron atoms</li>
+              <li>HTML editor text atom in code surface</li>
+              <li>Live-preview card header/action atoms</li>
+              <li>Footer action atoms (Cancel, Next)</li>
+            </ul>
+          </article>
+          <article class="panel" id="molecules">
+            <h2>Molecules</h2>
+            <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>82:7157</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:10px; margin:8px 0 10px;">
+              <div class="label-row">Name + Save Molecule</div>
+              <div style="display:grid; grid-template-columns:1fr auto; gap:8px;">
+                <input type="text" value="Name New Template" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                <button class="btn primary">Save Template</button>
+              </div>
+            </div>
+            <ul class="tiny">
+              <li>Name-and-save molecule (input + save action)</li>
+              <li>Base-template picker molecule (label + select + chevron)</li>
+              <li>HTML editor molecule (label + code area)</li>
+              <li>Preview panel molecule (live preview card + metadata)</li>
+              <li>Step footer molecule with helper copy and actions</li>
+            </ul>
+          </article>
+          <article class="panel" id="compositions">
+            <h2>Compositions</h2>
+            <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>82:7157</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+              <div style="font-weight:600; margin-bottom:8px;">Template Editor Composition</div>
+              <div style="display:grid; gap:8px;">
+                <div style="display:grid; grid-template-columns:1fr auto; gap:8px;">
+                  <input type="text" value="EMA/Boosted Offer" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                  <button class="btn primary">Save</button>
+                </div>
+                <div class="textarea" style="min-height:84px;">&lt;html&gt;...template markup...&lt;/html&gt;</div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead><tr><th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th></tr></thead>
+            <tbody>
+              <tr><td>Top Tabs + Settings</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Name New Template Input</td><td>Yes</td><td>Yes</td><td>Typing</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Save Template Button</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Base Template Dropdown</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>HTML Editor Textarea</td><td>Yes</td><td>Yes</td><td>Editing</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Live Preview Card + CTA</td><td>Yes</td><td>Yes</td><td>CTA pressed</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Footer Cancel + Next</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

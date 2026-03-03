@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Manager Component Storybook</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-default: #e2e8f0;
+      --border-focus: #6366f1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-text: #4338ca;
+      --tab-active-border: #4f46e5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+    h1, h2, p { margin: 0; }
+    .page { max-width: 1200px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .title { font-size: 24px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .tab:hover { background: var(--bg-subtle); }
+    .tab.active { background: var(--tab-active-bg); color: var(--tab-active-text); border-color: var(--tab-active-border); }
+    .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 14px;
+      background: var(--bg-surface);
+      display: grid;
+      gap: 8px;
+    }
+    .card h2 { font-size: 16px; }
+    .card p { color: var(--text-secondary); font-size: 13px; line-height: 1.4; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      text-decoration: none;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 7px 10px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--bg-surface);
+    }
+    .btn:hover { background: var(--bg-subtle); }
+    .btn.primary { background: var(--tab-active-bg); color: var(--tab-active-text); border-color: var(--tab-active-border); }
+    .quick { display: grid; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail {
+      border-right: 1px solid var(--border-default);
+      background: var(--bg-surface);
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; margin: 2px 0 6px; }
+    .rail-link {
+      display: block;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { background: var(--tab-active-bg); color: var(--tab-active-text); border-color: var(--tab-active-border); }
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link active" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+      </div>
+    </aside>
+    <main class="content-area">
+  <div class="page">
+    <section class="panel">
+      <h1 class="title">Campaign Manager Component Storybook</h1>
+      <p class="sub">Single navigation hub for all generated component/state reference pages.</p>
+    </section>
+
+    <section class="panel">
+      <h2 style="font-size:16px; margin-bottom:10px;">Global Libraries</h2>
+      <div class="actions">
+        <a class="btn primary" href="./DESIGN_TOKENS.html">Open Tokens</a>
+        <a class="btn primary" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Open Global Atoms</a>
+        <a class="btn primary" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+      </div>
+      <p class="sub" style="margin-top:10px;">Deduplicated canonical inventories with real UI snippets and source-page mappings. Design Guidelines: Figma layout patterns, typography, spacing, and component rules for faithful implementation.</p>
+    </section>
+
+    <section class="panel">
+      <div class="tabs">
+        <a class="tab active" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="tab" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="tab" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="tab" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+        <a class="tab" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="tab" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="tab" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="tab" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="tab" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="tab" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="tab" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="tab" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+        <a class="tab" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="tab" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="tab" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="tab" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+    </section>
+
+    <span id="atoms"></span>
+    <section class="panel" id="atoms-group">
+      <h2 style="font-size:16px; margin-bottom:10px;">Atoms</h2>
+      <div class="quick">
+        <div><a class="btn primary" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html#atoms">Dashboard Atoms</a> badges, tabs, pills, warning indicators</div>
+        <div><a class="btn primary" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html#atoms">IO List Atoms</a> alert chips, filter tokens, search primitives, spend meters</div>
+        <div><a class="btn primary" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html#atoms">IO Detail Atoms</a> status pills, burn-rate chip, tags</div>
+        <div><a class="btn primary" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html#atoms">Funnel Atoms</a> active/inactive filter tabs, bar segment, value label</div>
+      </div>
+    </section>
+
+    <span id="molecules"></span>
+    <section class="panel" id="molecules-group">
+      <h2 style="font-size:16px; margin-bottom:10px;">Molecules</h2>
+      <div class="quick">
+        <div><a class="btn primary" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html#molecules">Dashboard Molecules</a> metric card, progress block, IO row</div>
+        <div><a class="btn primary" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html#molecules">IO List Molecules</a> alert row, filter group, row spend unit</div>
+        <div><a class="btn primary" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html#molecules">IO Detail Molecules</a> spend card, campaign status row, funnel selector</div>
+        <div><a class="btn primary" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html#molecules">Funnel Molecules</a> metric tab group and campaign row metric</div>
+      </div>
+    </section>
+
+    <span id="compositions"></span>
+    <section class="panel" id="compositions-group">
+      <h2 style="font-size:16px; margin-bottom:10px;">Compositions</h2>
+      <div class="grid">
+        <article class="card">
+          <h2>Segmentation Flows</h2>
+          <p>List, SQL builder, and filter-builder compositions with all component states documented.</p>
+          <div class="actions">
+            <a class="btn primary" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+            <a class="btn primary" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+            <a class="btn primary" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Campaign Build Steps</h2>
+          <p>Details, incentive, messaging, template editor, scheduling, budgeting, and review compositions.</p>
+          <div class="actions">
+            <a class="btn primary" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Details</a>
+            <a class="btn primary" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Incentive</a>
+            <a class="btn primary" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Messaging</a>
+            <a class="btn primary" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template</a>
+            <a class="btn primary" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+            <a class="btn primary" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+            <a class="btn primary" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review</a>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Live Dashboards</h2>
+          <p>Campaign dashboard and insertion-order list/detail compositions, including funnel analytics module.</p>
+          <div class="actions">
+            <a class="btn primary" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Campaign Dashboard</a>
+            <a class="btn primary" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">IO List</a>
+            <a class="btn primary" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">IO Detail</a>
+            <a class="btn primary" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+          </div>
+        </article>
+        <article class="card">
+          <h2>All Component State Matrices</h2>
+          <p>Direct QA entry points for default/hover/active/focus/disabled/error states per page.</p>
+          <div class="actions">
+            <a class="btn" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html#state-matrix">Campaign List Matrix</a>
+            <a class="btn" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html#state-matrix">Dashboard Matrix</a>
+            <a class="btn" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html#state-matrix">IO List Matrix</a>
+            <a class="btn" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html#state-matrix">IO Detail Matrix</a>
+            <a class="btn" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html#state-matrix">Funnel Matrix</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="quick">
+        <div><strong>Primary entry:</strong> <code>COMPONENT_STORYBOOK.html</code> (or <code>index.html</code> to redirect)</div>
+        <div>Each page also contains cross-links to the others, so you can move between references like a mini Storybook.</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 style="font-size:16px; margin-bottom:10px;">Icon Mapping (Figma → Lucide)</h2>
+      <div class="quick">
+        <div><i class="iconoir iconoir-nav-arrow-down"></i> Chevron down / dropdowns → <code>iconoir-nav-arrow-down</code></div>
+        <div><i class="iconoir iconoir-nav-arrow-right"></i> Right arrow / next step → <code>iconoir-nav-arrow-right</code></div>
+        <div><i class="iconoir iconoir-cancel"></i> Close tab / remove → <code>iconoir-cancel</code></div>
+        <div><i class="iconoir iconoir-trash"></i> Delete row action → <code>iconoir-trash</code></div>
+        <div><i class="iconoir iconoir-globe"></i> Global / partner type icon → <code>iconoir-globe</code></div>
+        <div><i class="iconoir iconoir-edit-pencil"></i> Edit operator / inline edit → <code>iconoir-edit-pencil</code></div>
+      </div>
+    </section>
+  </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Incentive Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-danger: #dc2626;
+      --text-link: #2563eb;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-overlay: #0f172a;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --tab-default-border: #d9d9d9;
+      --input-ring: rgba(99, 102, 241, 0.2);
+      --card-selected: #f1f5f9;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text-primary); background: var(--bg-page); }
+    h1, h2, p { margin: 0; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail { border-right: 1px solid var(--border-default); background: var(--bg-surface); padding: 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link { display: block; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-surface); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); color: var(--text-primary); }
+    .page { max-width: 1400px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tiny { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .state-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+    .label { min-width: 88px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; font-weight: 500; }
+    .tab { border: 1px solid var(--tab-default-border); border-radius: 8px; padding: 8px 10px; background: #fff; color: var(--text-primary); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+    .tab.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .settings { background: var(--bg-subtle); }
+    .inc-cards { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+    .inc-card { border: 1px solid var(--border-default); border-radius: 12px; padding: 12px; min-height: 102px; display: grid; gap: 8px; }
+    .inc-card.selected { background: var(--card-selected); }
+    .inc-head { display: flex; justify-content: space-between; align-items: center; }
+    .radio { width: 14px; height: 14px; border: 1px solid #94a3b8; border-radius: 999px; display: inline-block; }
+    .radio.on { border-color: #0f172a; box-shadow: inset 0 0 0 3px #0f172a; }
+    .inc-title { font-weight: 500; font-size: 14px; }
+    .inc-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.3; }
+    .field-wrap { display: grid; gap: 4px; width: 100%; }
+    .label-row { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+    .label-row .req { color: var(--text-danger); }
+    .input { min-height: 42px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px 12px; background: #fff; color: var(--text-primary); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .input.placeholder { color: var(--text-muted); }
+    .input.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { border-radius: 8px; padding: 4px 8px; background: var(--bg-subtle); color: var(--text-secondary); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .comparison { border-radius: 12px; background: var(--bg-subtle); padding: 14px; }
+    .cmp-title { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 12px; }
+    .cmp-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; align-items: end; }
+    .cmp-grid small { display:block; font-size:11px; color:var(--text-secondary); margin-bottom:6px; }
+    .cmp-grid strong { font-size:24px; line-height:1; }
+    .cmp-grid strong.link { color: var(--text-link); }
+    .preview-card { width: 215px; border-radius: 12px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,.12); padding: 12px; border: 1px solid var(--border-default); }
+    .preview-top { display:flex; justify-content:space-between; font-size: 10px; color: var(--text-secondary); }
+    .preview-logo { color:#65a30d; font-size: 30px; font-weight: 600; margin: 8px 0; }
+    .preview-btn { background:#74c947; color:white; border-radius:999px; border:0; padding:8px 18px; font-weight:600; font-size:13px; }
+    .footer { border: 1px solid var(--border-default); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .btn { border-radius: 6px; border: 1px solid transparent; padding: 10px 24px; font-size: 14px; font-weight: 500; background: transparent; color: #595959; }
+    .btn.primary { background: var(--bg-overlay); color: #fff; display: inline-flex; align-items: center; gap: 8px; }
+    .btn.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .step { text-align: right; font-size: 14px; font-weight: 500; }
+    .step small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { background: var(--bg-subtle); color: var(--text-secondary); font-weight: 600; }
+    @media (max-width: 1180px) { .grid,.inc-cards,.split,.cmp-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link active" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#incentive-cards">Incentive Cards</a>
+        <a class="rail-link" href="#input-fields">Input Fields</a>
+        <a class="rail-link" href="#live-preview">Live Preview</a>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - Set Incentive Step Reference</h1>
+          <p class="sub">Source: Figma node `37:4066` (Set Incentive, with live preview and rate comparison).</p>
+          <p class="tiny">Includes incentive selection cards, tokenized multi-select inputs, rate fields, preview card, and step navigation states.</p>
+        </section>
+
+        <section class="grid">
+          <div class="panel">
+            <h2>Top Tabs + Settings</h2>
+            <div class="state-row"><span class="label">Default</span><span class="tab">All Campaigns</span><span class="tab">New Campaign</span><span class="tab">+</span><span class="tab settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            <div class="state-row"><span class="label">Focus</span><span class="tab focus">New Campaign</span><span class="tab focus settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+          </div>
+          <div class="panel">
+            <h2>Step Navigation Footer</h2>
+            <div class="footer">
+              <button class="btn">Cancel</button>
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div class="step">Step 2 of 6<small>Next Step: Configure Trigger</small></div>
+                <button class="btn primary">Next <i class="iconoir iconoir-nav-arrow-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="incentive-cards">
+          <h2>Incentive Type Cards</h2>
+          <div class="inc-cards">
+            <div class="inc-card selected">
+              <div class="inc-head"><i class="iconoir iconoir-trending-up"></i><span class="radio on"></span></div>
+              <div class="inc-title">Boosted Cashback</div>
+              <div class="inc-desc">Temporary increase in base cashback rates for specific merchants</div>
+            </div>
+            <div class="inc-card">
+              <div class="inc-head"><i class="iconoir iconoir-gift"></i><span class="radio"></span></div>
+              <div class="inc-title">Flat Action Reward</div>
+              <div class="inc-desc">One-time fixed reward for completing a specific shopping action</div>
+            </div>
+            <div class="inc-card">
+              <div class="inc-head"><i class="iconoir iconoir-moon-sat"></i><span class="radio"></span></div>
+              <div class="inc-title">None</div>
+              <div class="inc-desc">No incremental incentive is applied</div>
+            </div>
+          </div>
+          <div class="state-row"><span class="label">Focus</span><div class="inc-card selected" style="max-width:380px; box-shadow:0 0 0 3px var(--input-ring);"><div class="inc-head"><i class="iconoir iconoir-trending-up"></i><span class="radio on"></span></div><div class="inc-title">Boosted Cashback</div></div></div>
+        </section>
+
+        <section class="grid" id="input-fields">
+          <div class="panel">
+            <h2>Tokenized Multi-Select Inputs</h2>
+            <div class="field-wrap">
+              <div class="label-row">Application ID <span class="req">*</span></div>
+              <div class="input"><div class="chips"><span class="chip">46 - Acorns CE <i class="iconoir iconoir-cancel"></i></span></div></div>
+              <div class="tiny">type to add more</div>
+            </div>
+            <div class="field-wrap" style="margin-top:10px;">
+              <div class="label-row">Applicable Merchants <span class="req">*</span></div>
+              <div class="input"><div class="chips"><span class="chip">Walmart <i class="iconoir iconoir-cancel"></i></span><span class="chip">Macys <i class="iconoir iconoir-cancel"></i></span><span class="chip">All Merchants <i class="iconoir iconoir-cancel"></i></span></div></div>
+              <div class="tiny">type to add more</div>
+            </div>
+          </div>
+          <div class="panel">
+            <h2>Rate + Cap Fields</h2>
+            <div class="field-wrap">
+              <div class="label-row">Cashback Rate <span class="req">*</span></div>
+              <div class="split">
+                <div class="input">Target Percentage <span style="margin-left:auto;"><i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+                <div class="input">5 <span style="margin-left:auto; color:var(--text-muted);">%</span></div>
+              </div>
+            </div>
+            <div class="field-wrap" style="margin-top:10px;">
+              <div class="label-row">Max Incentives <span class="req">*</span></div>
+              <div class="split">
+                <div class="input">5 <span style="margin-left:auto; color:var(--text-muted);">$</span></div>
+                <div class="input">5 <span style="margin-left:auto; color:var(--text-muted);">$</span></div>
+              </div>
+            </div>
+            <div class="state-row"><span class="label">Focus</span><div class="input focus" style="min-width:320px;">Target Percentage <span style="margin-left:auto;"><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+          </div>
+        </section>
+
+        <section class="grid" id="live-preview">
+          <div class="panel">
+            <h2>Rate Comparison Block</h2>
+            <div class="comparison">
+              <div class="cmp-title">Rate Comparison</div>
+              <div class="cmp-grid">
+                <div><small>Walmart Base rate</small><strong>1.3%</strong></div>
+                <div><small>Walmart Boosted Rate</small><strong class="link">5%</strong></div>
+                <div><small>Acorns Base rate</small><strong>1.3%</strong></div>
+                <div><small>Acorns Boosted Rate</small><strong class="link">5%</strong></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <h2>Live Preview Rail</h2>
+            <div class="state-row"><span class="label">Card</span>
+              <div class="preview-card">
+                <div class="preview-top"><span>Live preview</span><span>...</span></div>
+                <div class="preview-logo">acorns</div>
+                <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">Limited time offer</div>
+                <div style="font-weight:600; line-height:1.35; margin-bottom:10px;">Get up to 4% invested into your Acorns account</div>
+                <button class="preview-btn">Activate</button>
+              </div>
+            </div>
+            <div class="state-row"><span class="label">Selectors</span><div class="input" style="min-width:210px;"><span class="chip"><i class="iconoir iconoir-globe"></i> Acorns CE</span><span style="margin-left:auto;"><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="panel" id="atoms">
+            <h2>Atoms</h2>
+            <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>48:4560</code></p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;">
+              <span class="tab active">Set Incentive</span>
+              <span class="token">46 - Acorns CE</span>
+              <span class="token">Walmart</span>
+              <input type="number" value="5" style="width:88px; border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              <button class="btn">Target Percentage</button>
+            </div>
+            <ul class="tiny">
+              <li>Incentive option card atoms (Boosted Cashback, Flat Action Reward, Moon variant)</li>
+              <li>Token-chip atoms for application ID and merchant selections</li>
+              <li>Numeric input atoms (cashback rate and max incentives)</li>
+              <li>Rate comparison label/value atoms</li>
+              <li>Tab, settings, and step-action button atoms</li>
+            </ul>
+          </article>
+          <article class="panel" id="molecules">
+            <h2>Molecules</h2>
+            <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>48:4560</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:10px; margin:8px 0 10px;">
+              <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Rate + Cap Molecule</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:8px;">
+                <input type="number" value="5" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                <input type="number" value="1" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                <button class="btn">Apply</button>
+              </div>
+            </div>
+            <ul class="tiny">
+              <li>Incentive selector molecule (icon + title + description + radio state)</li>
+              <li>Tokenized input molecule (label + chips + inline add affordance)</li>
+              <li>Cashback rate molecule (mode select + value input + unit)</li>
+              <li>Max incentives molecule (per-order + per-campaign fields)</li>
+              <li>Rate comparison molecule (merchant/acorns base and boosted values)</li>
+            </ul>
+          </article>
+          <article class="panel" id="compositions">
+            <h2>Compositions</h2>
+            <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>48:4560</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+              <div style="font-weight:600; margin-bottom:8px;">Incentive Setup Composition</div>
+              <div style="display:grid; gap:8px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;"><span class="tab active">Incentive</span><button class="btn">Settings</button></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:8px;">
+                  <input type="number" value="5" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                  <input type="number" value="1" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                  <button class="btn primary">Next</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead><tr><th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th></tr></thead>
+            <tbody>
+              <tr><td>Top Tabs + Settings</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Incentive Type Cards</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Application ID Input</td><td>Yes</td><td>Yes</td><td>Token add/remove</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Applicable Merchants Input</td><td>Yes</td><td>Yes</td><td>Token add/remove</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Cashback Rate Controls</td><td>Yes</td><td>Yes</td><td>Selected value</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Max Incentives Fields</td><td>Yes</td><td>Yes</td><td>Editing</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Rate Comparison Card</td><td>Yes</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Live Preview Card</td><td>Yes</td><td>Yes</td><td>CTA active</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Footer Step Actions</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>
