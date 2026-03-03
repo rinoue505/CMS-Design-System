@@ -1,0 +1,30 @@
+{
+  "name": "@campaign-manager/design-system",
+  "version": "1.0.0",
+  "description": "Design tokens, guidelines, and global atoms for Campaign Manager UI",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./tokens.css": "./tokens/tokens.css",
+    "./atoms.css": "./css/atoms.css",
+    "./tokens.json": "./tokens/tokens.json"
+  },
+  "files": [
+    "index.js",
+    "tokens",
+    "css",
+    "guidelines"
+  ],
+  "scripts": {},
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "campaign-manager",
+    "ui"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rinoue505/CMS-Design-System.git"
+  }
+}

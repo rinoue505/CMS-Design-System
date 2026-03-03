@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insertion Orders Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --warn-bg: #fbbf24;
+      --warn-text: #0f172a;
+      --danger: #ef4444;
+      --progress: #334155;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg-page); color: var(--text-primary); }
+    h1, h2, p { margin: 0; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display:grid; grid-template-columns:260px 1fr; min-height:100vh; }
+    .left-rail { border-right:1px solid var(--border-default); background:#fff; padding:16px; position:sticky; top:0; height:100vh; overflow:auto; }
+    .content-area { padding:24px; }
+    .rail-title { font-size:13px; font-weight:600; margin-bottom:12px; }
+    .rail-group { display:grid; gap:6px; margin-bottom:16px; }
+    .rail-label { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted); margin:2px 0 6px; }
+    .rail-link { display:block; border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:#fff; color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:500; }
+    .rail-link:hover { background:var(--bg-subtle); }
+    .rail-link.active { border-color:var(--tab-active-border); background:var(--tab-active-bg); color:var(--text-primary); }
+
+    .page { max-width:1460px; margin:0 auto; display:grid; gap:20px; }
+    .panel { background:#fff; border:1px solid var(--border-default); border-radius:12px; padding:16px; }
+    .title { font-size:22px; font-weight:600; }
+    .sub { margin-top:6px; font-size:14px; color:var(--text-secondary); }
+    .tiny { margin-top:6px; font-size:12px; color:var(--text-muted); }
+    .section-title { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-secondary); font-weight:600; }
+    .row { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .grid-5 { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+
+    .atom { border:1px solid var(--border-default); border-radius:10px; padding:10px; display:grid; gap:8px; background:#fff; }
+    .atom .name { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-secondary); }
+    .warn-chip { border-radius:8px; background:var(--warn-bg); color:var(--warn-text); padding:8px 10px; font-size:13px; font-weight:500; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .filter { border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-subtle); color:var(--text-secondary); font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px; }
+    .search { min-height:40px; border:1px solid var(--border-strong); border-radius:8px; padding:8px 12px; width:100%; color:var(--text-muted); font-size:13px; display:flex; align-items:center; gap:8px; }
+    .meter { width:86px; height:6px; border-radius:999px; background:#e2e8f0; overflow:hidden; margin-top:4px; }
+    .meter > span { display:block; height:100%; background:var(--progress); }
+    .meter.danger > span { background:var(--danger); }
+    .molecule { border:1px solid var(--border-default); border-radius:12px; padding:12px; background:#fff; }
+
+    .alert-wrap { border:1px solid var(--border-default); border-radius:12px; background:#eef2f7; padding:12px; display:grid; gap:8px; }
+    .table { border:1px solid var(--border-default); border-radius:12px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { border-bottom:1px solid var(--border-default); padding:12px 14px; text-align:left; }
+    th { font-size:13px; color:var(--text-secondary); font-weight:500; background:#fff; }
+    tr:last-child td { border-bottom:0; }
+    .subline { display:block; font-size:11px; color:var(--text-muted); margin-top:3px; }
+    .state { color:var(--text-secondary); }
+    .menu { color:var(--text-muted); letter-spacing:2px; font-weight:700; text-align:center; }
+
+    @media (max-width:1100px) {
+      .storybook-layout { grid-template-columns:1fr; }
+      .left-rail { position:static; height:auto; border-right:0; border-bottom:1px solid var(--border-default); }
+      .content-area { padding:16px; }
+      .grid-5 { grid-template-columns:1fr 1fr; }
+      .grid-3 { grid-template-columns:1fr 1fr; }
+    }
+    @media (max-width:700px) { .grid-2, .grid-3, .grid-5 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link active" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#pacing-alerts">Pacing Alerts</a>
+        <a class="rail-link" href="#filters-search">Filters + Search</a>
+        <a class="rail-link" href="#orders-table">Orders Table</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - Insertion Orders Reference</h1>
+          <p class="sub">Source: Figma node `226:18254` (All Orders with pacing alerts and spend controls).</p>
+          <p class="tiny">Refactored to atomic documentation structure for parity with detail pages.</p>
+        </section>
+
+        <section class="panel" id="atoms">
+          <h2 class="section-title">Atoms</h2>
+          <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source node: <code>226:18349</code></p>
+          <div class="grid-5" style="margin-top:10px;">
+            <div class="atom"><div class="name">Warning Alert Chip</div><div><span class="warn-chip"><span>High Burn Rate</span><span>$4.2k per day</span></span></div></div>
+            <div class="atom"><div class="name">Filter Token</div><div><span class="filter">Status: All <i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+            <div class="atom"><div class="name">Search Field</div><div class="search"><i class="iconoir iconoir-search"></i> Search Insertion Orders...</div></div>
+            <div class="atom"><div class="name">Spend Meter</div><div>82%<div class="meter"><span style="width:82%;"></span></div></div></div>
+            <div class="atom"><div class="name">Critical Meter</div><div>98%<div class="meter danger"><span style="width:98%;"></span></div></div></div>
+          </div>
+        </section>
+
+        <section class="panel" id="molecules">
+          <h2 class="section-title">Molecules</h2>
+          <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source node: <code>226:18349</code></p>
+          <div class="grid-3" style="margin-top:10px;">
+            <div class="molecule">
+              <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Alert Row</div>
+              <span class="warn-chip"><span>SDC_Q2_2025 close to hitting budget</span><span>View</span></span>
+            </div>
+            <div class="molecule">
+              <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Filter Group</div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="filter">Status: All <i class="iconoir iconoir-nav-arrow-down"></i></span>
+                <span class="filter">Merchant: All <i class="iconoir iconoir-nav-arrow-down"></i></span>
+              </div>
+            </div>
+            <div class="molecule">
+              <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Order Row Spend Unit</div>
+              <div>82% &nbsp; $98,420<div class="meter"><span style="width:82%;"></span></div></div>
+            </div>
+          </div>
+          <ul class="tiny" style="margin-top:10px;">
+            <li>Pacing alert molecule (alert message + severity + view action)</li>
+            <li>Filter/search molecule (search + status/merchant filters)</li>
+            <li>Order spend molecule (percent, spend value, progress rail)</li>
+          </ul>
+        </section>
+
+        <section class="panel" id="compositions">
+          <h2 class="section-title">Compositions</h2>
+          <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source node: <code>226:18349</code></p>
+          <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+            <div style="font-weight:600; margin-bottom:8px;">Insertion Orders List Composition</div>
+            <div style="display:grid; gap:8px;">
+              <div class="warn-chip"><span>NSQ_Q2_2025 has high burn rate</span><span>View</span></div>
+              <div class="row">
+                <div class="search" style="max-width:420px;"><i class="iconoir iconoir-search"></i> Search Insertion Orders...</div>
+                <span class="filter">Status: All <i class="iconoir iconoir-nav-arrow-down"></i></span>
+              </div>
+              <div>82% &nbsp; $98,420<div class="meter"><span style="width:82%;"></span></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="pacing-alerts">
+          <h2 class="section-title" style="margin-bottom:8px;">Pacing Alerts</h2>
+          <div class="alert-wrap">
+            <div class="row" style="font-size:14px;"><strong>2 Alerts Needing Attention</strong><span><i class="iconoir iconoir-warning-triangle"></i></span></div>
+            <div class="warn-chip"><span>SDC_Q2_2025 close to hitting budget &nbsp; 98%</span><span>View</span></div>
+            <div class="warn-chip"><span>NSQ_Q2_2025 has high burn rate &nbsp; $4.2k per day</span><span>View</span></div>
+          </div>
+        </section>
+
+        <section class="panel" id="filters-search">
+          <div class="row">
+            <div class="search" style="max-width:420px;"><i class="iconoir iconoir-search"></i> Search Insertion Orders (IOs)...</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <span class="filter">Status: All <i class="iconoir iconoir-nav-arrow-down"></i></span>
+              <span class="filter">Merchant: All <i class="iconoir iconoir-nav-arrow-down"></i></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="orders-table">
+          <div class="table">
+            <table>
+              <thead>
+                <tr><th>IO Name</th><th>Merchant</th><th>Budget</th><th>Spend</th><th>Campaigns</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>NSQ_Q2_2025<span class="subline">IO-8829-XQ</span></td>
+                  <td>North Star Outfitters</td>
+                  <td>$120,000.00</td>
+                  <td>82% &nbsp; $98,420<div class="meter"><span style="width:82%;"></span></div></td>
+                  <td class="state">3 Active</td>
+                  <td class="menu">...</td>
+                </tr>
+                <tr>
+                  <td>Lum_Q2_2025<span class="subline">IO-1844-HLD</span></td>
+                  <td>Lumina Cosmetics</td>
+                  <td>$120,000.00</td>
+                  <td>0% &nbsp; $0.00<div class="meter"><span style="width:0%;"></span></div></td>
+                  <td class="state">3 Active</td>
+                  <td class="menu">...</td>
+                </tr>
+                <tr>
+                  <td>SDC_Q2_2025<span class="subline">IO-8829-XQ</span></td>
+                  <td>Swift Delivery Co</td>
+                  <td>$120,000.00</td>
+                  <td>98% &nbsp; $44,120<div class="meter danger"><span style="width:98%;"></span></div></td>
+                  <td class="state">3 Active</td>
+                  <td class="menu">...</td>
+                </tr>
+                <tr>
+                  <td>Edu_Q2_2025<span class="subline">IO-8829-XQ</span></td>
+                  <td>Edutech Solutions</td>
+                  <td>$120,000.00</td>
+                  <td>100% &nbsp; $79,985<div class="meter"><span style="width:100%;"></span></div></td>
+                  <td class="state">3 Active</td>
+                  <td class="menu">...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead><tr><th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th></tr></thead>
+            <tbody>
+              <tr><td>Pacing Alert Card</td><td>Yes</td><td>Yes</td><td>Expanded/Collapsed</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Warning Alert Rows</td><td>Yes</td><td>Yes</td><td>Viewed</td><td>Yes</td><td>N/A</td><td>Critical warning</td></tr>
+              <tr><td>Search Input</td><td>Yes</td><td>Yes</td><td>Typing</td><td>Yes</td><td>Yes</td><td>Invalid query</td></tr>
+              <tr><td>Status/Merchant Filters</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>IO Table Rows</td><td>Yes</td><td>Yes</td><td>Row selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Spend Meter</td><td>Yes</td><td>Yes</td><td>Progress update</td><td>N/A</td><td>N/A</td><td>Over-budget/high burn</td></tr>
+              <tr><td>Overflow Action</td><td>Yes</td><td>Yes</td><td>Menu open</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

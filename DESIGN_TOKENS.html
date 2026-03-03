@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Tokens — Design System</title>
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #4f46e5;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-accent: #eef2ff;
+      --bg-warning: #fbbf24;
+      --border-default: #e2e8f0;
+      --border-focus: #6366f1;
+      --nav-active-bg: #eef2ff;
+      --nav-active-text: #4338ca;
+      --tab-active-bg: #eef2ff;
+      --tab-active-text: #4338ca;
+      --tab-active-border: #4f46e5;
+      --status-active-bg: #d2f0df;
+      --status-active-text: #11552f;
+      --status-success-bg: #f0fdf4;
+      --status-success-text: #16a34a;
+      --status-neutral-bg: #f1f5f9;
+      --status-neutral-text: #64748b;
+      --status-warning-bg: #fffbeb;
+      --status-warning-text: #d97706;
+      --status-error-bg: #fef2f2;
+      --status-error-text: #dc2626;
+      --text-danger: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text-primary); background: var(--bg-page); }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail { border-right: 1px solid var(--border-default); background: var(--bg-surface); padding: 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+    .content-area { padding: 32px 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; margin: 2px 0 6px; }
+    .rail-link { display: block; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-surface); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { background: var(--tab-active-bg); color: var(--tab-active-text); border-color: var(--tab-active-border); }
+    .page { max-width: 1240px; margin: 0 auto; display: grid; gap: 16px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { margin: 0; font-size: 24px; font-weight: 700; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .token-section { margin-top: 24px; }
+    .token-section h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px; }
+    .token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .token-swatch { border: 1px solid var(--border-default); border-radius: 8px; overflow: hidden; }
+    .token-swatch .swatch { height: 40px; }
+    .token-swatch .meta { padding: 8px 10px; font-size: 12px; }
+    .token-swatch .name { font-weight: 600; color: var(--text-primary); }
+    .token-swatch .value { font-family: Menlo, monospace; color: var(--text-secondary); font-size: 11px; margin-top: 2px; }
+    .token-row { display: grid; grid-template-columns: 180px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-default); font-size: 13px; }
+    .token-row:last-child { border-bottom: 0; }
+    .token-row .name { font-weight: 500; color: var(--text-primary); }
+    .token-row .value { font-family: Menlo, monospace; font-size: 12px; color: var(--text-secondary); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px 12px; text-align: left; }
+    th { background: var(--bg-subtle); font-weight: 600; color: var(--text-primary); }
+    .rules-list { margin: 0; padding-left: 20px; }
+    .rules-list li { margin-bottom: 8px; color: var(--text-secondary); line-height: 1.5; }
+    .color-swatch { display: inline-block; width: 24px; height: 24px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); vertical-align: middle; margin-right: 8px; }
+    .color-swatch.light { border-color: rgba(0,0,0,0.15); }
+    td .hex-with-swatch { display: flex; align-items: center; gap: 8px; }
+    @media (max-width: 900px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link active" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#token-groups">Token Groups</a>
+        <a class="rail-link" href="#rules">Rules</a>
+        <a class="rail-link" href="#quick-reference">Token Quick Reference</a>
+        <a class="rail-link" href="#color-notes">Color Notes</a>
+        <a class="rail-link" href="#typography">Typography</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <header class="panel">
+          <h1 class="title">Design Tokens</h1>
+          <p class="sub">Semantic tokens from the Design System. All tokens live in <code>tokens.css</code> as CSS custom properties on <code>:root</code>. Link before Tailwind CDN.</p>
+          <p class="sub" style="margin-top:8px;">Source: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+        </header>
+
+        <section class="panel" id="token-groups">
+          <h2>Token Groups</h2>
+          <table>
+            <thead><tr><th>Prefix</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><code>--text-*</code></td><td>Typography colors (body, links, states)</td></tr>
+              <tr><td><code>--fg-*</code></td><td>Foreground elements — icons, UI chrome</td></tr>
+              <tr><td><code>--bg-*</code></td><td>Background surfaces and overlays</td></tr>
+              <tr><td><code>--border-*</code></td><td>Border colors</td></tr>
+              <tr><td><code>--button-*</code></td><td>Button variant colors</td></tr>
+              <tr><td><code>--input-*</code></td><td>Form input colors</td></tr>
+              <tr><td><code>--nav-*</code></td><td>Sidebar navigation states</td></tr>
+              <tr><td><code>--tab-*</code></td><td>Tab navigation states</td></tr>
+              <tr><td><code>--status-*</code></td><td>Badge/status indicator colors</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel" id="rules">
+          <h2>Rules</h2>
+          <ul class="rules-list">
+            <li><strong>Always use semantic tokens.</strong> Never use hardcoded hex values in components.</li>
+            <li><strong>Never use raw palette tokens.</strong> Add a new semantic token rather than using hex directly.</li>
+            <li><strong>Token intent matters.</strong> Use tokens for their described purpose:
+              <ul style="margin-top:8px; padding-left:20px;">
+                <li><code>--bg-surface</code> → white card/panel backgrounds</li>
+                <li><code>--bg-subtle</code> → secondary surface backgrounds, metric cards, monospace pills</li>
+                <li><code>--bg-page</code> → page-level background</li>
+                <li><code>--bg-accent</code> → accent-colored backgrounds, historical changelog borders</li>
+                <li><code>--bg-warning</code> → warning/alert banner backgrounds (amber)</li>
+                <li><code>--nav-*</code> → sidebar nav only</li>
+                <li><code>--tab-*</code> → tab navigation only</li>
+                <li><code>--status-*</code> → badge and status indicators only</li>
+                <li><code>--status-active-*</code> → "Active" campaign/IO badges specifically (distinct green from success)</li>
+              </ul>
+            </li>
+          </ul>
+        </section>
+
+        <section class="panel" id="quick-reference">
+          <h2>Token Quick Reference</h2>
+          <div class="token-section">
+            <h3 style="font-size:14px; margin:0 0 8px; color:var(--text-secondary);">Text</h3>
+            <table>
+              <thead><tr><th>Token</th><th>Color</th><th>Use</th></tr></thead>
+              <tbody>
+                <tr><td><code>--text-primary</code></td><td><span class="hex-with-swatch"><span class="color-swatch" style="background:#0F172A"></span>#0F172A</span></td><td>Main body, headings, section labels</td></tr>
+                <tr><td><code>--text-secondary</code></td><td><span class="hex-with-swatch"><span class="color-swatch" style="background:#475569"></span>#475569</span></td><td>Supporting text, labels, metadata</td></tr>
+                <tr><td><code>--text-muted</code></td><td><span class="hex-with-swatch"><span class="color-swatch" style="background:#94A3B8"></span>#94A3B8</span></td><td>Placeholder, disabled, chart axes</td></tr>
+                <tr><td><code>--text-link</code></td><td><span class="hex-with-swatch"><span class="color-swatch" style="background:#4F46E5"></span>#4F46E5</span></td><td>Links, external value references</td></tr>
+                <tr><td><code>--text-danger</code></td><td><span class="hex-with-swatch"><span class="color-swatch" style="background:#DC2626"></span>#DC2626</span></td><td>Error text</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="token-section">
+            <h3 style="font-size:14px; margin:0 0 8px; color:var(--text-secondary);">Backgrounds</h3>
+            <table>
+              <thead><tr><th>Token</th><th>Color</th><th>Use</th></tr></thead>
+              <tbody>
+                <tr><td><code>--bg-page</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#F8FAFC"></span>#F8FAFC</span></td><td>Page background</td></tr>
+                <tr><td><code>--bg-surface</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#FFFFFF"></span>#FFFFFF</span></td><td>Cards, panels</td></tr>
+                <tr><td><code>--bg-subtle</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#F1F5F9"></span>#F1F5F9</span></td><td>Metric cards, monospace pills</td></tr>
+                <tr><td><code>--bg-accent</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#EEF2FF"></span>#EEF2FF</span></td><td>Accent backgrounds, changelog borders</td></tr>
+                <tr><td><code>--bg-warning</code></td><td><span class="hex-with-swatch"><span class="color-swatch" style="background:#fbbf24"></span>#fbbf24</span></td><td>Warning/alert banners (amber)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="token-section">
+            <h3 style="font-size:14px; margin:0 0 8px; color:var(--text-secondary);">Nav &amp; Tabs</h3>
+            <table>
+              <thead><tr><th>Token</th><th>Color</th><th>Use</th></tr></thead>
+              <tbody>
+                <tr><td><code>--nav-active-bg</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#EEF2FF"></span>#EEF2FF</span></td><td>Active nav item background</td></tr>
+                <tr><td><code>--nav-active-text</code></td><td><span class="hex-with-swatch"><span class="color-swatch" style="background:#4338CA"></span>#4338CA</span></td><td>Active nav item text</td></tr>
+                <tr><td><code>--tab-active-bg</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#EEF2FF"></span>#EEF2FF</span></td><td>Active tab background</td></tr>
+                <tr><td><code>--tab-active-border</code></td><td><span class="hex-with-swatch"><span class="color-swatch" style="background:#4F46E5"></span>#4F46E5</span></td><td>Active tab indicator</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="token-section">
+            <h3 style="font-size:14px; margin:0 0 8px; color:var(--text-secondary);">Status Badges</h3>
+            <p class="sub" style="margin:0 0 8px; font-size:12px;"><code>--status-active-*</code> and <code>--status-success-*</code> are different greens. Never substitute one for the other.</p>
+            <table>
+              <thead><tr><th>Token</th><th>Color</th><th>Use</th></tr></thead>
+              <tbody>
+                <tr><td><code>--status-active-bg</code> / <code>--status-active-text</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#d2f0df"></span>#d2f0df</span> <span class="hex-with-swatch"><span class="color-swatch" style="background:#11552f"></span>#11552f</span></td><td>"Active" campaign/IO badge only</td></tr>
+                <tr><td><code>--status-success-bg</code> / <code>--status-success-text</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#f0fdf4"></span>#f0fdf4</span> <span class="hex-with-swatch"><span class="color-swatch" style="background:#16a34a"></span>#16a34a</span></td><td>Complete, confirmed</td></tr>
+                <tr><td><code>--status-error-bg</code> / <code>--status-error-text</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#fef2f2"></span>#fef2f2</span> <span class="hex-with-swatch"><span class="color-swatch" style="background:#dc2626"></span>#dc2626</span></td><td>Error, failed</td></tr>
+                <tr><td><code>--status-warning-bg</code> / <code>--status-warning-text</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#fffbeb"></span>#fffbeb</span> <span class="hex-with-swatch"><span class="color-swatch" style="background:#d97706"></span>#d97706</span></td><td>Warning pills (light yellow)</td></tr>
+                <tr><td><code>--status-neutral-bg</code> / <code>--status-neutral-text</code></td><td><span class="hex-with-swatch"><span class="color-swatch light" style="background:#f1f5f9"></span>#f1f5f9</span> <span class="hex-with-swatch"><span class="color-swatch" style="background:#64748b"></span>#64748b</span></td><td>Draft, inactive</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" id="color-notes">
+          <h2>Color Notes</h2>
+          <p class="sub" style="margin:0 0 12px;">Clarifications for similar or easily confused tokens.</p>
+          <ul class="rules-list">
+            <li><strong>Active vs Success greens.</strong> <code>--status-active-*</code> and <code>--status-success-*</code> are different greens. Use <code>--status-active-*</code> only for "Active" campaign/IO badges. Use <code>--status-success-*</code> for complete, confirmed states. Never substitute one for the other.</li>
+            <li><strong>Warning backgrounds.</strong> <code>--bg-warning</code> (#fbbf24) is amber for full-width warning/alert banners (e.g. High Burn Rate). <code>--status-warning-bg</code> (#fffbeb) is light yellow for small badge pills. They are not interchangeable.</li>
+            <li><strong>Links.</strong> Use <code>--text-link</code> (#4F46E5) for links and external value references in pills.</li>
+            <li><strong>Accent backgrounds.</strong> <code>--bg-accent</code> (#EEF2FF) is for accent-colored surfaces and historical changelog borders.</li>
+            <li><strong>Foreground elements.</strong> <code>--fg-primary</code> and <code>--fg-secondary</code> are for icons and UI chrome, not body text.</li>
+          </ul>
+        </section>
+
+        <section class="panel" id="typography">
+          <h2>Typography</h2>
+          <p class="sub" style="margin:0 0 12px;">All type uses <strong>Inter</strong>. Use the scale below — never set arbitrary font sizes.</p>
+          <table>
+            <thead><tr><th>Style</th><th>Size</th><th>Weight</th><th>Line Height</th><th>Use</th></tr></thead>
+            <tbody>
+              <tr><td>Heading/H2</td><td>24px</td><td>Bold (700)</td><td>32px</td><td>Large stat numbers</td></tr>
+              <tr><td>Heading/H3</td><td>20px</td><td>SemiBold (600)</td><td>28px</td><td>Campaign names, page titles</td></tr>
+              <tr><td>Heading/H5</td><td>16px</td><td>SemiBold (600)</td><td>24px</td><td>Card headings</td></tr>
+              <tr><td>Heading/H6</td><td>14px</td><td>Medium (500)</td><td>20px</td><td>Sub-headings</td></tr>
+              <tr><td>Body/Default</td><td>14px</td><td>Regular (400)</td><td>22px</td><td>General body text</td></tr>
+              <tr><td>Body/Small</td><td>13px</td><td>Regular (400)</td><td>20px</td><td>Secondary body, labels</td></tr>
+              <tr><td>Caption/Default</td><td>12px</td><td>Regular (400)</td><td>16px</td><td>Timestamps, metadata</td></tr>
+              <tr><td>Caption/Uppercase</td><td>12px</td><td>Medium (500)</td><td>16px</td><td>Section labels (ALL CAPS), 0.6px letter-spacing</td></tr>
+              <tr><td>UI/Button Default</td><td>14px</td><td>Medium (500)</td><td>20px</td><td>Button labels</td></tr>
+            </tbody>
+          </table>
+          <p class="sub" style="margin-top:12px; font-size:12px;">Monospace data values (Billing IDs, App IDs) use <strong>Source Code Pro Medium 13px</strong>.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

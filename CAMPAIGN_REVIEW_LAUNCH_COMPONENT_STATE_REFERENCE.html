@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Review &amp; Launch Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #4f46e5;
+      --text-danger: #dc2626;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-overlay: #0f172a;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --tab-default-border: #d9d9d9;
+      --input-ring: rgba(99, 102, 241, 0.2);
+      --preview-green: #74c947;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text-primary); background: var(--bg-page); }
+    h1, h2, p { margin: 0; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail { border-right: 1px solid var(--border-default); background: var(--bg-surface); padding: 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link { display: block; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-surface); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); color: var(--text-primary); }
+    .page { max-width: 1460px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tiny { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .state-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+    .label { min-width: 88px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; font-weight: 500; }
+    .tab { border: 1px solid var(--tab-default-border); border-radius: 8px; padding: 8px 10px; background: #fff; color: var(--text-primary); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+    .tab.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .settings { background: var(--bg-subtle); }
+    .section-card { border: 1px solid var(--border-default); border-radius: 12px; }
+    .section-head { display:flex; justify-content:space-between; align-items:center; padding: 12px 14px; border-bottom: 1px solid var(--border-default); }
+    .section-head h3 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; }
+    .edit-link { color: var(--text-link); font-size: 13px; text-decoration: none; font-weight: 500; }
+    .section-body { padding: 12px 14px; display:grid; gap: 12px; }
+    .kv-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .kv .k { font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; }
+    .kv .v { font-size: 14px; font-weight: 500; }
+    .pill { display:inline-flex; align-items:center; gap:6px; padding: 2px 8px; border-radius: 8px; background: var(--bg-subtle); color: var(--text-primary); font-size: 12px; }
+    .pill.link { color: var(--text-link); }
+    .step-footer { border: 1px solid var(--border-default); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .step { text-align: right; font-size: 14px; font-weight: 500; }
+    .step small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+    .btn { border-radius: 8px; border: 1px solid var(--border-strong); padding: 10px 14px; font-size: 14px; font-weight: 500; background: #fff; color: var(--text-secondary); }
+    .btn.primary { border-color: transparent; background: var(--bg-overlay); color: #fff; display: inline-flex; align-items: center; gap: 8px; }
+    .preview-card { width: 220px; border-radius: 12px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,.12); padding: 12px; border: 1px solid var(--border-default); }
+    .preview-top { display:flex; justify-content:space-between; font-size: 10px; color: var(--text-secondary); }
+    .preview-logo { color:#65a30d; font-size: 30px; font-weight: 600; margin: 8px 0; }
+    .preview-btn { background: var(--preview-green); color:white; border-radius:999px; border:0; padding:8px 18px; font-weight:600; font-size:13px; }
+    .select { min-height: 40px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 9px 12px; display:flex; justify-content:space-between; align-items:center; font-size:14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { background: var(--bg-subtle); color: var(--text-secondary); font-weight: 600; }
+    @media (max-width: 1180px) { .grid, .kv-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link active" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#overview">Overview</a>
+        <a class="rail-link" href="#incentives">Incentives</a>
+        <a class="rail-link" href="#scheduling">Scheduling</a>
+        <a class="rail-link" href="#budget-io">Budget &amp; IO</a>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - Review &amp; Launch Reference</h1>
+          <p class="sub">Source: Figma node `74:5758` (final review step before launch).</p>
+          <p class="tiny">Summarizes campaign details with editable grouped sections, live preview rail, and final Save Campaign action.</p>
+        </section>
+
+        <section class="grid">
+          <div class="panel">
+            <h2>Top Tabs + Settings</h2>
+            <div class="state-row"><span class="label">Default</span><span class="tab">All Campaigns</span><span class="tab">New Campaign</span><span class="tab">+</span><span class="tab settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            <div class="state-row"><span class="label">Focus</span><span class="tab focus">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+          </div>
+          <div class="panel">
+            <h2>Final Step Footer</h2>
+            <div class="step-footer">
+              <button class="btn">Cancel</button>
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div class="step">Step 6 of 6<small>Next Step: Save Campaign</small></div>
+                <button class="btn primary">Save Campaign</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card" id="overview">
+          <div class="section-head"><h3>Overview</h3><a class="edit-link" href="#">Edit</a></div>
+          <div class="section-body">
+            <div class="kv-grid">
+              <div class="kv"><div class="k">Campaign Name</div><div class="v">Q4 Walmart Campaign</div></div>
+              <div class="kv"><div class="k">Target Segment</div><div class="v"><span class="pill">Really Long Segment Name (80 users)</span></div></div>
+              <div class="kv"><div class="k">Placement Type</div><div class="v"><span class="pill">EMA</span></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card" id="incentives">
+          <div class="section-head"><h3>Incentives</h3><a class="edit-link" href="#">Edit</a></div>
+          <div class="section-body">
+            <div class="kv-grid">
+              <div class="kv"><div class="k">Incentive Type</div><div class="v"><span class="pill link">Boosted Offer ($5)</span></div></div>
+              <div class="kv"><div class="k">App ID</div><div class="v"><span class="pill">46 - Acorns Chrome</span> <span class="pill">511</span></div></div>
+              <div class="kv"><div class="k">Frequency Cap</div><div class="v"><span class="pill">Max: 1 per day</span></div></div>
+            </div>
+            <div class="kv-grid">
+              <div class="kv"><div class="k">Target Merchant</div><div class="v"><span class="pill">Walmart.com</span> <span class="pill">Walmart.ca</span></div></div>
+              <div class="kv"><div class="k">Trigger Condition</div><div class="v"><span class="pill link">User Visits: Ebay.com</span></div></div>
+              <div class="kv"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <div class="section-card" id="scheduling">
+            <div class="section-head"><h3>Scheduling</h3><a class="edit-link" href="#">Edit</a></div>
+            <div class="section-body">
+              <div class="kv-grid">
+                <div class="kv"><div class="k">Launch Date</div><div class="v">Dec 31, 2026<br>12:00 PT</div></div>
+                <div class="kv"><div class="k">End Date</div><div class="v">Dec 31, 2027<br>12:00 PT</div></div>
+                <div class="kv"><div class="k">Duration</div><div class="v">1 Year, 4h</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="section-card" id="budget-io">
+            <div class="section-head"><h3>Budget &amp; IO</h3><a class="edit-link" href="#">Edit</a></div>
+            <div class="section-body">
+              <div class="kv-grid">
+                <div class="kv"><div class="k">Planned Budget</div><div class="v">$15,000.00</div></div>
+                <div class="kv"><div class="k">Merchant IO</div><div class="v"><span class="pill">WalmartQ4-2025-WAL</span></div></div>
+                <div class="kv"><div class="k">Remaining Budget</div><div class="v">$11,000</div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <div class="panel">
+            <h2>Live Preview Rail</h2>
+            <div class="preview-card">
+              <div class="preview-top"><span>Live preview</span><span>...</span></div>
+              <div class="preview-logo">acorns</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">Limited time offer</div>
+              <div style="font-weight:600; line-height:1.35; margin-bottom:10px;">Get up to 4% invested into your Acorns account</div>
+              <button class="preview-btn">Activate</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h2>Preview Selectors</h2>
+            <div class="state-row"><span class="label">App ID</span><div class="select" style="min-width:220px;"><span><i class="iconoir iconoir-globe"></i> Acorns CE</span><span><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+            <div class="state-row"><span class="label">Merchant</span><div class="select" style="min-width:220px;"><span><i class="iconoir iconoir-shop"></i> Walmart</span><span><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="panel" id="atoms">
+            <h2>Atoms</h2>
+            <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>221:5500</code></p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;">
+              <span class="tab active">Review &amp; Launch</span>
+              <button class="btn">Edit</button>
+              <select style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);"><option>Acorns CE</option></select>
+              <button class="btn primary">Save Campaign</button>
+            </div>
+            <ul class="tiny">
+              <li>Section label and value text atoms</li>
+              <li>Pill atoms (segment, placement, trigger condition, frequency cap)</li>
+              <li>Edit link/button atoms per section</li>
+              <li>Schedule value atoms (launch/end/time remaining)</li>
+              <li>Tab and primary action button atoms</li>
+              <li>Preview selector atoms (App ID, Merchant)</li>
+            </ul>
+          </article>
+          <article class="panel" id="molecules">
+            <h2>Molecules</h2>
+            <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>221:5500</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:10px; margin:8px 0 10px;">
+              <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Review Summary Molecule</div>
+              <div style="display:grid; grid-template-columns:1fr auto; gap:8px;">
+                <span>Budget: $17,000</span>
+                <button class="btn">Edit</button>
+              </div>
+            </div>
+            <ul class="tiny">
+              <li>Overview summary molecule (label/value grid + edit action)</li>
+              <li>Incentive summary molecule (type, app ID, cap, merchant, trigger)</li>
+              <li>Schedule summary molecule (launch/end/time remaining)</li>
+              <li>Budget + IO summary molecule (planned budget + linked IO)</li>
+              <li>Footer launch molecule (step state + final save action)</li>
+            </ul>
+          </article>
+          <article class="panel" id="compositions">
+            <h2>Compositions</h2>
+            <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>221:5500</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+              <div style="font-weight:600; margin-bottom:8px;">Review &amp; Launch Composition</div>
+              <div style="display:grid; gap:8px;">
+                <div style="display:grid; grid-template-columns:1fr auto; gap:8px;"><span>Campaign: Holiday Shopping</span><button class="btn">Edit</button></div>
+                <div style="display:grid; grid-template-columns:1fr auto; gap:8px;"><span>Budget: $17,000</span><button class="btn">Edit</button></div>
+                <div style="display:flex; justify-content:flex-end;"><button class="btn primary">Save Campaign</button></div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead><tr><th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th></tr></thead>
+            <tbody>
+              <tr><td>Summary Section Card</td><td>Yes</td><td>Yes</td><td>Expanded</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Edit Link</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Value Pills / Chips</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Scheduling / Budget Key Values</td><td>Yes</td><td>N/A</td><td>Updated</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Live Preview + Selectors</td><td>Yes</td><td>Yes</td><td>CTA active</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Footer Save Campaign Action</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

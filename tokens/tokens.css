@@ -1,0 +1,60 @@
+/**
+ * Campaign Manager Design Tokens
+ * Use semantic tokens only. Never hardcode hex values in components.
+ * Link this file before Tailwind or other CSS.
+ */
+:root {
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-link: #4f46e5;
+  --text-danger: #dc2626;
+
+  /* Backgrounds */
+  --bg-page: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --bg-accent: #eef2ff;
+  --bg-warning: #fbbf24;
+  --bg-overlay: #0f172a;
+
+  /* Borders & Focus */
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #6366f1;
+  --input-ring: rgba(99, 102, 241, 0.2);
+
+  /* Nav */
+  --nav-active-bg: #eef2ff;
+  --nav-active-text: #4338ca;
+  --nav-default-text: #475569;
+  --nav-hover-bg: #f8fafc;
+
+  /* Tabs */
+  --tab-active-bg: #eef2ff;
+  --tab-active-text: #4338ca;
+  --tab-active-border: #4f46e5;
+  --tab-default-bg: #ffffff;
+  --tab-default-border: #e2e8f0;
+  --tab-default-text: #334155;
+
+  /* Status Badges */
+  --status-active-bg: #d2f0df;
+  --status-active-text: #11552f;
+  --status-success-bg: #f0fdf4;
+  --status-success-text: #16a34a;
+  --status-neutral-bg: #f1f5f9;
+  --status-neutral-text: #64748b;
+  --status-warning-bg: #fffbeb;
+  --status-warning-text: #d97706;
+  --status-error-bg: #fef2f2;
+  --status-error-text: #dc2626;
+
+  /* UI */
+  --progress: #334155;
+  --danger: #ef4444;
+  --metric-green: #16a34a;
+  --card-selected: #f1f5f9;
+  --chart-bar: #0f172a;
+}

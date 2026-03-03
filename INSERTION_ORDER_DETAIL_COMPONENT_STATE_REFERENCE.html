@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insertion Order Detail Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #4f46e5;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --warn-bg: #fbbf24;
+      --success-bg: #d2f0df;
+      --success-text: #11552f;
+      --scheduled-bg: #fde68a;
+      --scheduled-text: #854d0e;
+      --ended-bg: #e2e8f0;
+      --ended-text: #475569;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg-page); color: var(--text-primary); }
+    h1, h2, p { margin: 0; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display:grid; grid-template-columns:260px 1fr; min-height:100vh; }
+    .left-rail { border-right:1px solid var(--border-default); background:#fff; padding:16px; position:sticky; top:0; height:100vh; overflow:auto; }
+    .content-area { padding:24px; }
+    .rail-title { font-size:13px; font-weight:600; margin-bottom:12px; }
+    .rail-group { display:grid; gap:6px; margin-bottom:16px; }
+    .rail-label { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted); margin:2px 0 6px; }
+    .rail-link { display:block; border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:#fff; color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:500; }
+    .rail-link:hover { background:var(--bg-subtle); }
+    .rail-link.active { border-color:var(--tab-active-border); background:var(--tab-active-bg); color:var(--text-primary); }
+
+    .page { max-width: 1480px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel { background:#fff; border:1px solid var(--border-default); border-radius:12px; padding:16px; }
+    .title { font-size:22px; font-weight:600; }
+    .sub { margin-top:6px; color:var(--text-secondary); font-size:14px; }
+    .tiny { margin-top:6px; color:var(--text-muted); font-size:12px; }
+    .section-title { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-secondary); font-weight:600; }
+    .row { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .grid-5 { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+
+    .atom { border:1px solid var(--border-default); border-radius:10px; padding:10px; display:grid; gap:8px; background:#fff; }
+    .atom .name { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-secondary); }
+    .tab { border:1px solid var(--border-strong); border-radius:8px; padding:8px 10px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:8px; background:#fff; }
+    .tab.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); }
+    .chip { border-radius:8px; padding:2px 8px; background:var(--bg-subtle); font-size:12px; font-weight:500; margin-right:6px; }
+    .chip.link { color: var(--text-link); }
+    .burn { border-radius:8px; background:var(--warn-bg); padding:8px 12px; display:inline-flex; align-items:center; gap:16px; font-size:13px; font-weight:500; }
+    .btn { border:1px solid var(--border-strong); border-radius:8px; padding:9px 12px; background:#fff; color:var(--text-secondary); font-size:14px; font-weight:500; }
+    .status { display:inline-flex; padding:3px 10px; border-radius:8px; font-size:13px; font-weight:500; }
+    .status.active { background:var(--success-bg); color:var(--success-text); }
+    .status.scheduled { background:var(--scheduled-bg); color:var(--scheduled-text); }
+    .status.ended { background:var(--ended-bg); color:var(--ended-text); }
+
+    .metric { background:var(--bg-subtle); border:1px solid var(--border-default); border-radius:12px; padding:12px; }
+    .metric .k { font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.04em; }
+    .metric .v { font-size:31px; font-weight:700; margin-top:4px; }
+    .metric .s { font-size:13px; color:var(--text-secondary); margin-left:4px; }
+    .v.red { color:var(--danger); }
+
+    .meter { width:74px; height:6px; border-radius:999px; background:#e2e8f0; overflow:hidden; margin-top:4px; }
+    .meter > span { display:block; height:100%; background:#334155; }
+    .molecule { border:1px solid var(--border-default); border-radius:12px; padding:12px; background:#fff; }
+    .table { border:1px solid var(--border-default); border-radius:12px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { border-bottom:1px solid var(--border-default); padding:12px 14px; text-align:left; }
+    th { font-size:13px; color:var(--text-secondary); font-weight:500; }
+    tr:last-child td { border-bottom:0; }
+
+    .split { display:grid; grid-template-columns:1fr 300px; gap:16px; }
+    .funnel-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .pill-tab { border:1px solid var(--border-default); border-radius:8px; background:#fff; color:var(--text-secondary); padding:5px 10px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px; }
+    .pill-tab.active { background:#0f172a; color:#fff; border-color:#0f172a; }
+    .asset { border:1px solid var(--border-default); border-radius:10px; padding:8px; display:flex; align-items:center; gap:8px; margin-bottom:8px; background:var(--bg-subtle); }
+    .thumb { width:32px; height:32px; border-radius:6px; background:#d1d5db; }
+    .log { border-left:2px solid var(--border-default); padding-left:10px; margin-bottom:10px; }
+    .log strong { display:block; font-size:13px; margin-bottom:2px; }
+    .log span { font-size:12px; color:var(--text-secondary); }
+
+    @media (max-width:1100px) {
+      .storybook-layout { grid-template-columns:1fr; }
+      .left-rail { position:static; height:auto; border-right:0; border-bottom:1px solid var(--border-default); }
+      .content-area { padding:16px; }
+      .grid-5 { grid-template-columns:1fr 1fr; }
+      .grid-3 { grid-template-columns:1fr 1fr; }
+      .split { grid-template-columns:1fr; }
+    }
+    @media (max-width:700px) { .grid-2, .grid-3, .grid-5 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link active" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#header">Header Section</a>
+        <a class="rail-link" href="#performance">Performance Overview</a>
+        <a class="rail-link" href="#campaigns-table">All Campaigns Table</a>
+        <a class="rail-link" href="#funnel">Funnel Metrics</a>
+        <a class="rail-link" href="#assets">Assets + Changelog</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - Insertion Order Detail Reference</h1>
+          <p class="sub">Source: Figma node `226:18349` (single insertion-order detail dashboard).</p>
+          <p class="tiny">Refactored to atomic structure: atoms, molecules, then composed dashboard sections.</p>
+        </section>
+
+        <section class="panel" id="atoms">
+          <h2 class="section-title">Atoms</h2>
+          <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source node: <code>226:18349</code></p>
+          <div class="grid-5" style="margin-top:10px;">
+            <div class="atom"><div class="name">Warning Chip</div><div><span class="burn"><span>High Burn Rate</span><span>$5.2k per day</span></span></div></div>
+            <div class="atom"><div class="name">Status Active</div><div><span class="status active">Active</span></div></div>
+            <div class="atom"><div class="name">Status Scheduled</div><div><span class="status scheduled">Scheduled</span></div></div>
+            <div class="atom"><div class="name">Status Ended</div><div><span class="status ended">Ended</span></div></div>
+            <div class="atom"><div class="name">Tag Chip</div><div><span class="chip">North Star Outfitters</span></div></div>
+          </div>
+        </section>
+
+        <section class="panel" id="molecules">
+          <h2 class="section-title">Molecules</h2>
+          <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source nodes: <code>226:18349</code>, <code>226:18637</code></p>
+          <div class="grid-3" style="margin-top:10px;">
+            <div class="metric">
+              <div class="k">Spend %</div>
+              <div class="v">24%</div>
+              <div class="meter"><span style="width:24%;"></span></div>
+            </div>
+            <div class="molecule">
+              <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Campaign Row Status + Spend</div>
+              <div><span class="status active">Active</span></div>
+              <div style="margin-top:8px; font-size:13px;">82% &nbsp; $98,420</div>
+              <div class="meter"><span style="width:82%;"></span></div>
+            </div>
+            <div class="molecule">
+              <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Funnel Metric Selector</div>
+              <span class="pill-tab active"><i class="iconoir iconoir-eye"></i> Impressions</span>
+            </div>
+          </div>
+          <ul class="tiny" style="margin-top:10px;">
+            <li>Performance metric molecule (label + value + optional spend rail)</li>
+            <li>Campaign row molecule (status badge + spend % + amount + flighting)</li>
+            <li>Funnel selector molecule (metric chips with active state)</li>
+          </ul>
+        </section>
+
+        <section class="panel" id="compositions">
+          <h2 class="section-title">Compositions</h2>
+          <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+          <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <p class="tiny">Figma source nodes: <code>226:18349</code>, <code>226:18637</code></p>
+          <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+            <div style="font-weight:600; margin-bottom:8px;">Insertion Order Detail Composition</div>
+            <div style="display:grid; gap:8px;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap;"><span class="tab active">NSQ_Q2_2025</span><span class="burn"><span>High Burn Rate</span><span>$5.2k per day</span></span></div>
+              <div class="grid-3">
+                <div class="metric"><div class="k">Planned Budget</div><div class="v">$500,000.00</div></div>
+                <div class="metric"><div class="k">Net Spend</div><div class="v">$120,000.00</div></div>
+                <div class="metric"><div class="k">Spend %</div><div class="v">24%</div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="header">
+          <div class="row">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <span class="tab">All Orders</span>
+              <span class="tab active">NSQ_Q2_2025</span>
+              <span class="tab">+</span>
+            </div>
+            <span class="tab">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span>
+          </div>
+          <div style="margin-top:12px;"><span class="burn"><span>High Burn Rate</span><span>$5.2k per day</span></span></div>
+          <div class="row" style="margin-top:12px;">
+            <div>
+              <h2 style="font-size:33px;">NSQ_Q2_2025</h2>
+              <p style="margin-top:4px;">
+                <span class="chip">North Star Outfitters</span>
+                <span style="font-size:11px; color:var(--text-muted);">IO-8829-XQ</span>
+              </p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn">Edit Order</button>
+              <button class="btn"><i class="iconoir iconoir-download"></i> Export</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="performance">
+          <h2 class="section-title" style="margin-bottom:10px;">Performance Overview</h2>
+          <div class="grid-5">
+            <div class="metric"><div class="k">Planned Budget</div><div class="v">$500,000.00</div></div>
+            <div class="metric"><div class="k">Net Spend</div><div class="v">$120,000.00</div></div>
+            <div class="metric"><div class="k">Spend %</div><div class="v">24%</div><div class="meter"><span style="width:24%;"></span></div></div>
+            <div class="metric"><div class="k">Burn Rate (Planned)</div><div class="v">$4.2k<span class="s">/ week</span></div></div>
+            <div class="metric"><div class="k">Burn Rate (Actual)</div><div class="v red">$5.2k<span class="s">/ week</span></div></div>
+          </div>
+        </section>
+
+        <section class="panel" id="campaigns-table">
+          <div class="row" style="margin-bottom:10px;">
+            <h2 class="section-title">All Campaigns</h2>
+            <button class="btn">New Campaign</button>
+          </div>
+          <div class="table">
+            <table>
+              <thead><tr><th>Name</th><th>Status</th><th>Spend %</th><th>Flighting</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Summer Awareness EMA</td>
+                  <td><span class="status active">Active</span></td>
+                  <td>82% &nbsp; $98,420<div class="meter"><span style="width:82%;"></span></div></td>
+                  <td>12/31/26 → 12/31/27</td>
+                  <td style="color:var(--text-muted);">...</td>
+                </tr>
+                <tr>
+                  <td>Display Remarketing Global</td>
+                  <td><span class="status scheduled">Scheduled</span></td>
+                  <td>0% &nbsp; $0.00<div class="meter"><span style="width:0%;"></span></div></td>
+                  <td>12/31/26 → 12/31/27</td>
+                  <td style="color:var(--text-muted);">...</td>
+                </tr>
+                <tr>
+                  <td>Deal of the Day</td>
+                  <td><span class="status ended">Ended</span></td>
+                  <td>100% &nbsp; $79,985<div class="meter"><span style="width:100%;"></span></div></td>
+                  <td>12/31/26 → 12/31/27</td>
+                  <td style="color:var(--text-muted);">...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" id="funnel">
+          <h2 class="section-title">Funnel Metrics Per Campaign</h2>
+          <div class="funnel-tabs">
+            <span class="pill-tab active"><i class="iconoir iconoir-eye"></i> Impressions</span>
+            <span class="pill-tab"><i class="iconoir iconoir-click"></i> Clicks</span>
+            <span class="pill-tab"><i class="iconoir iconoir-cart"></i> Conversions</span>
+            <span class="pill-tab"><i class="iconoir iconoir-star"></i> ROAS</span>
+          </div>
+          <div style="margin-top:12px; border-top:1px solid var(--border-default); padding-top:10px; font-size:14px;">
+            Summer Awareness EMA <span style="float:right; color:var(--text-secondary);">30.2k</span>
+          </div>
+        </section>
+
+        <section class="split" id="assets">
+          <div class="panel">
+            <h2 class="section-title" style="margin-bottom:10px;">Supporting Context</h2>
+            <p style="font-size:13px; color:var(--text-secondary);">Left content area tracks campaign-level metrics while the right rail manages asset inventory and chronological updates.</p>
+          </div>
+          <div class="panel">
+            <h2 class="section-title" style="margin-bottom:10px;">Assets</h2>
+            <div class="asset"><div class="thumb"></div><div><div style="font-size:13px;">Lifestyle-Primary.png</div><div style="font-size:11px; color:var(--text-muted);">1080x1920</div></div></div>
+            <div class="asset"><div class="thumb"></div><div><div style="font-size:13px;">Lifestyle-Secondary.png</div><div style="font-size:11px; color:var(--text-muted);">1080x1920</div></div></div>
+            <div class="asset"><div class="thumb"></div><div><div style="font-size:13px;">Logo.png</div><div style="font-size:11px; color:var(--text-muted);">150x150</div></div></div>
+            <div class="asset"><div class="thumb"></div><div><div style="font-size:13px;">SOW.pdf</div><div style="font-size:11px; color:var(--text-muted);">150x150</div></div></div>
+            <div style="text-align:right; font-size:13px; color:#4f46e5; font-weight:500;"><i class="iconoir iconoir-plus"></i> Add Assets</div>
+            <h2 class="section-title" style="margin:16px 0 8px;">Changelog</h2>
+            <div class="log"><strong>Budget Adjusted</strong><span>Nov 10, 11:11AM by Ian Miller</span></div>
+            <div class="log"><strong>Campaign Created</strong><span>Nov 9, 11:11AM by Ian Miller</span></div>
+            <div class="log"><strong>IO Authorized</strong><span>Nov 6, 10:45AM by Kace Layton</span></div>
+          </div>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead><tr><th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th></tr></thead>
+            <tbody>
+              <tr><td>Warning/Burn Rate Chip</td><td>Yes</td><td>Yes</td><td>Threshold reached</td><td>N/A</td><td>N/A</td><td>Critical pacing</td></tr>
+              <tr><td>Header Tabs + Actions</td><td>Yes</td><td>Yes</td><td>Current IO selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Performance Cards</td><td>Yes</td><td>Yes</td><td>Value updated</td><td>N/A</td><td>N/A</td><td>Anomaly</td></tr>
+              <tr><td>Campaign Table Rows</td><td>Yes</td><td>Yes</td><td>Row selected</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Status Pills</td><td>Yes</td><td>N/A</td><td>State-specific</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Funnel Metric Tabs</td><td>Yes</td><td>Yes</td><td>Active tab</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Assets + Changelog</td><td>Yes</td><td>Yes</td><td>Entry selected</td><td>Yes</td><td>N/A</td><td>Missing asset</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>
