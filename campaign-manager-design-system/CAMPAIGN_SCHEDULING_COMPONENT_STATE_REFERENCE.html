@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Scheduling Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-danger: #dc2626;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-overlay: #0f172a;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --tab-default-border: #d9d9d9;
+      --input-ring: rgba(99, 102, 241, 0.2);
+      --link-blue: #4f46e5;
+      --preview-green: #74c947;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text-primary); background: var(--bg-page); }
+    h1, h2, p { margin: 0; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail { border-right: 1px solid var(--border-default); background: var(--bg-surface); padding: 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link { display: block; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-surface); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); color: var(--text-primary); }
+    .page { max-width: 1460px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tiny { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .stack { display: grid; gap: 10px; }
+    .state-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+    .label { min-width: 88px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; font-weight: 500; }
+    .tab { border: 1px solid var(--tab-default-border); border-radius: 8px; padding: 8px 10px; background: #fff; color: var(--text-primary); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+    .tab.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .settings { background: var(--bg-subtle); }
+    .field-wrap { display: grid; gap: 4px; width: 100%; }
+    .label-row { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+    .label-row .req { color: var(--text-danger); }
+    .input, .select, .pill, .muted-box {
+      min-height: 42px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text-primary);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .muted-box { background: var(--bg-subtle); border-color: transparent; display: block; min-height: 86px; }
+    .focus { border-color: var(--border-focus) !important; box-shadow: 0 0 0 3px var(--input-ring); }
+    .error { border-color: var(--text-danger) !important; color: var(--text-danger); }
+    .placeholder { color: var(--text-muted); }
+    .btn { border-radius: 8px; border: 1px solid var(--border-strong); padding: 10px 14px; font-size: 14px; font-weight: 500; background: #fff; color: var(--text-secondary); }
+    .btn.primary { border-color: transparent; background: var(--bg-overlay); color: #fff; display: inline-flex; align-items: center; gap: 8px; }
+    .btn.link { border: 0; padding: 0; background: transparent; color: var(--link-blue); }
+    .chip { border: 1px dashed var(--border-strong); border-radius: 10px; padding: 12px; color: var(--text-secondary); font-size: 13px; text-align: center; }
+    .preview-card { width: 220px; border-radius: 12px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,.12); padding: 12px; border: 1px solid var(--border-default); }
+    .preview-top { display:flex; justify-content:space-between; font-size: 10px; color: var(--text-secondary); }
+    .preview-logo { color:#65a30d; font-size: 30px; font-weight: 600; margin: 8px 0; }
+    .preview-btn { background: var(--preview-green); color:white; border-radius:999px; border:0; padding:8px 18px; font-weight:600; font-size:13px; }
+    .footer { border: 1px solid var(--border-default); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .step { text-align: right; font-size: 14px; font-weight: 500; }
+    .step small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { background: var(--bg-subtle); color: var(--text-secondary); font-weight: 600; }
+    @media (max-width: 1180px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link active" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#date-time">Date &amp; Time</a>
+        <a class="rail-link" href="#frequency-caps">Frequency Caps</a>
+        <a class="rail-link" href="#cooldown-logic">Cool-down Logic</a>
+        <a class="rail-link" href="#trigger-conditions">Trigger Conditions</a>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - Scheduling &amp; Distribution Reference</h1>
+          <p class="sub">Source: Figma node `214:3027` (Scheduling &amp; Distribution step, step 3 of 6).</p>
+          <p class="tiny">Documents date/time selection, calculated duration block, caps/logic controls, trigger builder, live preview rail, and footer progression.</p>
+        </section>
+
+        <section class="grid">
+          <div class="panel">
+            <h2>Top Tabs + Settings</h2>
+            <div class="state-row"><span class="label">Default</span><span class="tab">All Campaigns</span><span class="tab">New Campaign</span><span class="tab">+</span><span class="tab settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            <div class="state-row"><span class="label">Focus</span><span class="tab focus">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+          </div>
+          <div class="panel">
+            <h2>Step Footer</h2>
+            <div class="footer">
+              <button class="btn">Cancel</button>
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div class="step">Step 3 of 6<small>Next Step: Scheduling &amp; Distribution</small></div>
+                <button class="btn primary">Next <i class="iconoir iconoir-nav-arrow-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid" id="date-time">
+          <div class="panel stack">
+            <h2>Start / End Date &amp; Time</h2>
+            <div class="field-wrap">
+              <div class="label-row">Start Date &amp; Time <span class="req">*</span></div>
+              <div class="input">11/31/2026, 09:00AM PST <i class="iconoir iconoir-calendar"></i></div>
+            </div>
+            <div class="field-wrap">
+              <div class="label-row">End Date &amp; Time <span class="req">*</span></div>
+              <div class="input">12/31/2026, 09:00AM PST <i class="iconoir iconoir-calendar"></i></div>
+            </div>
+            <div class="state-row"><span class="label">Focus</span><div class="input focus" style="min-width:340px;">12/31/2026, 09:00AM PST <i class="iconoir iconoir-calendar"></i></div></div>
+            <div class="state-row"><span class="label">Error</span><div class="input error" style="min-width:340px;">End date must be after start date <i class="iconoir iconoir-warning-circle"></i></div></div>
+          </div>
+          <div class="panel stack">
+            <h2>Calculated Duration</h2>
+            <div class="muted-box">
+              <div style="display:flex; align-items:center; gap:8px; color:var(--text-secondary); font-size:12px;"><i class="iconoir iconoir-clock"></i> Calculated Duration</div>
+              <div style="font-size:30px; font-weight:600; margin-top:8px;">30 days, 12 hours</div>
+            </div>
+            <div class="state-row"><span class="label">Loading</span><div class="muted-box placeholder" style="min-width:320px;">Calculating duration...</div></div>
+          </div>
+        </section>
+
+        <section class="grid" id="frequency-caps">
+          <div class="panel stack">
+            <h2>Frequency Caps</h2>
+            <div class="input placeholder"><span><i class="iconoir iconoir-warning-triangle"></i> Global Frequency Cap Set for 20 per day, 40 per week</span></div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <div class="select" style="min-width:54px;">1 <i class="iconoir iconoir-nav-arrow-down"></i></div>
+              <span>view(s) per user per</span>
+              <div class="select" style="min-width:86px;">Day <i class="iconoir iconoir-nav-arrow-down"></i></div>
+            </div>
+            <button class="btn link"><i class="iconoir iconoir-plus"></i> Add campaign lifetime cap</button>
+          </div>
+          <div class="panel stack" id="cooldown-logic">
+            <h2>Cool-down Logic</h2>
+            <div class="label-row">Cool-down Logic <span class="req">*</span></div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <span>Cool-down after</span>
+              <div class="select" style="min-width:56px;">3 <i class="iconoir iconoir-nav-arrow-down"></i></div>
+              <div class="select" style="min-width:72px;">View <i class="iconoir iconoir-nav-arrow-down"></i></div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <span>Cool-down after</span>
+              <div class="select" style="min-width:56px;">1 <i class="iconoir iconoir-nav-arrow-down"></i></div>
+              <div class="select" style="min-width:72px;">Click <i class="iconoir iconoir-nav-arrow-down"></i></div>
+              <span style="color:#ef4444;">Remove</span>
+            </div>
+            <button class="btn link"><i class="iconoir iconoir-plus"></i> Add stand-down logic</button>
+          </div>
+        </section>
+
+        <section class="grid" id="trigger-conditions">
+          <div class="panel stack">
+            <h2>Trigger Conditions</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="label-row">Add Trigger Condition <span class="req">*</span></div>
+              <div style="display:flex; gap:8px; align-items:center; color:var(--text-secondary);">HTML <span class="pill" style="min-height:auto; padding:2px 6px; border:0; background:var(--bg-subtle);">OFF</span></div>
+            </div>
+            <div style="display:grid; gap:8px;">
+              <div style="display:grid; grid-template-columns: 160px 1fr auto; gap:8px;">
+                <div class="select">URL Contains <i class="iconoir iconoir-nav-arrow-down"></i></div>
+                <div class="input placeholder">e.g. macys.com</div>
+                <div class="pill"><i class="iconoir iconoir-trash"></i></div>
+              </div>
+              <div style="text-align:center; color:var(--text-muted); font-size:11px;">AND</div>
+              <div style="display:grid; grid-template-columns: 160px 1fr auto; gap:8px;">
+                <div class="select">CSS Selector <i class="iconoir iconoir-nav-arrow-down"></i></div>
+                <div class="input placeholder">&lt;&gt;</div>
+                <div class="pill"><i class="iconoir iconoir-trash"></i></div>
+              </div>
+            </div>
+            <div class="chip">Add another condition</div>
+          </div>
+          <div class="panel stack">
+            <h2>Live Preview Rail</h2>
+            <div class="preview-card">
+              <div class="preview-top"><span>Live preview</span><span>...</span></div>
+              <div class="preview-logo">acorns</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">Limited time offer</div>
+              <div style="font-weight:600; line-height:1.35; margin-bottom:10px;">Get up to 4% invested into your Acorns account</div>
+              <button class="preview-btn">Activate</button>
+              <div style="margin-top:8px; color:var(--text-secondary); font-size:12px;">Exclusions Apply <i class="iconoir iconoir-nav-arrow-down"></i></div>
+            </div>
+            <div class="state-row"><span class="label">App ID</span><div class="select" style="min-width:210px;"><span><i class="iconoir iconoir-globe"></i> Acorns CE</span><span><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+            <div class="state-row"><span class="label">Merchant</span><div class="select" style="min-width:210px;"><span><i class="iconoir iconoir-shop"></i> Walmart</span><span><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="panel" id="atoms">
+            <h2>Atoms</h2>
+            <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>214:3027</code></p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;">
+              <input type="date" value="2026-12-31" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              <input type="time" value="12:00" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              <input type="number" value="1" style="width:88px; border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              <button class="btn">Add Trigger</button>
+            </div>
+            <ul class="tiny">
+              <li>Date/time field atoms (start and end)</li>
+              <li>Frequency value and unit atoms (view(s) per day)</li>
+              <li>Cool-down number/select atoms</li>
+              <li>Trigger condition operator and value atoms</li>
+              <li>SQL/HTML toggle atom and add-condition atom</li>
+              <li>Footer action atoms</li>
+            </ul>
+          </article>
+          <article class="panel" id="molecules">
+            <h2>Molecules</h2>
+            <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>214:3027</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:10px; margin:8px 0 10px;">
+              <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Start/End Datetime Molecule</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <input type="datetime-local" value="2026-12-31T12:00" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                <input type="datetime-local" value="2027-12-31T12:00" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              </div>
+            </div>
+            <ul class="tiny">
+              <li>Datetime group molecule (start + end + calendar controls)</li>
+              <li>Duration card molecule (clock icon + computed duration)</li>
+              <li>Frequency cap molecule (value, unit, lifetime-cap action)</li>
+              <li>Cool-down logic molecule (row stack + remove + add actions)</li>
+              <li>Trigger builder molecule (condition rows + AND connector)</li>
+              <li>Preview rail molecule (live preview + app and merchant selectors)</li>
+            </ul>
+          </article>
+          <article class="panel" id="compositions">
+            <h2>Compositions</h2>
+            <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>214:3027</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+              <div style="font-weight:600; margin-bottom:8px;">Scheduling &amp; Distribution Composition</div>
+              <div style="display:grid; gap:8px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                  <input type="datetime-local" value="2026-12-31T12:00" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                  <input type="datetime-local" value="2027-12-31T12:00" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                </div>
+                <div style="display:grid; grid-template-columns:1fr auto; gap:8px;">
+                  <input type="text" value="Max 1 per day" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                  <button class="btn primary">Next</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead><tr><th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th></tr></thead>
+            <tbody>
+              <tr><td>Date &amp; Time Inputs</td><td>Yes</td><td>Yes</td><td>Calendar open</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Calculated Duration Card</td><td>Yes</td><td>N/A</td><td>Updated</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Frequency Cap Inputs</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Cool-down Logic Rows</td><td>Yes</td><td>Yes</td><td>Row selected</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Trigger Condition Builder</td><td>Yes</td><td>Yes</td><td>AND grouping</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Live Preview + Selectors</td><td>Yes</td><td>Yes</td><td>CTA active</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Footer Cancel + Next</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

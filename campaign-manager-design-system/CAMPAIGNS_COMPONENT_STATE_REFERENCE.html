@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaigns List Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #4f46e5;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-overlay: #0f172a;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --tab-default-border: #d9d9d9;
+      --status-success-bg: #d2f0df;
+      --status-success-text: #11552f;
+      --status-neutral-bg: #e2e8f0;
+      --status-neutral-text: #475569;
+      --input-ring: rgba(99, 102, 241, 0.2);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text-primary); background: var(--bg-page); }
+    h1, h2, p { margin: 0; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail { border-right: 1px solid var(--border-default); background: var(--bg-surface); padding: 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link { display: block; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-surface); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); color: var(--text-primary); }
+    .page { max-width: 1400px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tiny { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .state-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+    .label { min-width: 88px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; font-weight: 500; }
+    .tab { border: 1px solid var(--tab-default-border); border-radius: 8px; padding: 8px 10px; background: #fff; color: var(--text-primary); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+    .tab.active { background: var(--tab-active-bg); border-color: var(--tab-active-border); }
+    .tab.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .tab.disabled { opacity: .45; }
+    .settings { background: var(--bg-subtle); }
+    .badge { border-radius: 8px; padding: 2px 8px; font-size: 14px; line-height: 22px; font-weight: 500; }
+    .badge.success { background: var(--status-success-bg); color: var(--status-success-text); }
+    .badge.ended { background: var(--status-neutral-bg); color: var(--status-neutral-text); }
+    .spend { width: 116px; display: grid; gap: 4px; }
+    .spend-top { display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; }
+    .spend-top .pct { color: var(--text-muted); }
+    .spend-top .amt { color: var(--text-primary); }
+    .bar { height: 6px; border-radius: 12px; overflow: hidden; background: var(--bg-subtle); }
+    .bar > span { display: block; height: 100%; background: #475569; border-radius: 12px; width: 82%; }
+    .bar.red > span { background: #ef4444; width: 98%; }
+    .bar.full > span { width: 100%; background: #94a3b8; }
+    .chip { border-radius: 8px; padding: 3px 8px; background: var(--bg-subtle); font-size: 13px; line-height: 20px; color: var(--text-secondary); display: inline-flex; gap: 4px; align-items: center; }
+    .chip code { font-family: "Source Code Pro", Menlo, monospace; font-size: 13px; color: var(--text-secondary); }
+    .flight { display: inline-flex; gap: 10px; align-items: center; color: #64748b; font-size: 14px; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .flight .iconoir { color: #94a3b8; }
+    .dot-menu { color: #94a3b8; letter-spacing: 2px; font-weight: 700; }
+    .table { border: 1px solid var(--border-default); border-radius: 10px; overflow: hidden; }
+    .tr { display: grid; grid-template-columns: 180px 90px 145px 140px 170px 150px 28px; gap: 10px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--border-default); }
+    .tr:first-child { border-top: 0; font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+    .tr:hover { background: var(--bg-subtle); }
+    .tr.focus { box-shadow: inset 0 0 0 2px var(--border-focus); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { background: var(--bg-subtle); color: var(--text-secondary); font-weight: 600; }
+    @media (max-width: 1160px) { .grid { grid-template-columns: 1fr; } .tr { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link active" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#top-nav">Top Navigation</a>
+        <a class="rail-link" href="#campaign-rows">Campaign Rows</a>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - All Campaigns List Reference</h1>
+          <p class="sub">Source: Figma node `198:3741` (campaign listing table with settings and spend visualization).</p>
+          <p class="tiny">Captures the campaigns list frame and all reusable component states for implementation/QA.</p>
+        </section>
+
+        <section class="grid" id="top-nav">
+          <div class="panel">
+            <h2>Tabs + Settings Control</h2>
+            <div class="state-row"><span class="label">Default</span><span class="tab">All Campaigns</span><span class="tab">New Campaign</span><span class="tab">+</span><span class="tab settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            <div class="state-row"><span class="label">Active</span><span class="tab active">All Campaigns</span><span class="tab active">New Campaign</span></div>
+            <div class="state-row"><span class="label">Focus</span><span class="tab focus">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            <div class="state-row"><span class="label">Disabled</span><span class="tab disabled">New Campaign</span></div>
+          </div>
+
+          <div class="panel">
+            <h2>Status Badges</h2>
+            <div class="state-row"><span class="label">Active</span><span class="badge success">Active</span></div>
+            <div class="state-row"><span class="label">Ended</span><span class="badge ended">Ended</span></div>
+            <div class="state-row"><span class="label">Hover</span><span class="badge success" style="filter: brightness(.96);">Active</span></div>
+          </div>
+        </section>
+
+        <section class="panel" id="campaign-rows">
+          <h2>Campaign Table Rows (Observed Variants)</h2>
+          <div class="table">
+            <div class="tr">
+              <div>Name</div><div>Status</div><div>Placement</div><div>Spend %</div><div>Segment</div><div>Flighting</div><div></div>
+            </div>
+            <div class="tr">
+              <div>Campaign Name</div>
+              <div><span class="badge success">Active</span></div>
+              <div>EMA-Boosted-Default</div>
+              <div class="spend"><div class="spend-top"><span class="pct">82%</span><span class="amt">$98,420</span></div><div class="bar"><span></span></div></div>
+              <div><span class="chip"><code>Really Long Seg...</code> (80)</span></div>
+              <div><span class="flight">12/31/26 <i class="iconoir iconoir-nav-arrow-right"></i> 12/31/27</span></div>
+              <div class="dot-menu">...</div>
+            </div>
+            <div class="tr">
+              <div>Campaign Name</div>
+              <div><span class="badge success">Active</span></div>
+              <div>EMA-Boosted-Default</div>
+              <div class="spend"><div class="spend-top"><span class="pct">98%</span><span class="amt">$44,120</span></div><div class="bar red"><span></span></div></div>
+              <div><span class="chip"><code>Really Long Seg...</code> (80)</span></div>
+              <div><span class="flight">12/31/26 <i class="iconoir iconoir-nav-arrow-right"></i> 12/31/27</span></div>
+              <div class="dot-menu">...</div>
+            </div>
+            <div class="tr focus">
+              <div>Campaign Name</div>
+              <div><span class="badge ended">Ended</span></div>
+              <div>EMA-Boosted-Default</div>
+              <div class="spend"><div class="spend-top"><span class="pct">100%</span><span class="amt">$79,985</span></div><div class="bar full"><span></span></div></div>
+              <div><span class="chip"><code>Really Long Seg...</code> (80)</span></div>
+              <div><span class="flight">12/31/26 <i class="iconoir iconoir-nav-arrow-right"></i> 12/31/27</span></div>
+              <div class="dot-menu">...</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <div class="panel">
+            <h2>Spend Meter States</h2>
+            <div class="state-row"><span class="label">Normal</span><div class="spend"><div class="spend-top"><span class="pct">82%</span><span class="amt">$98,420</span></div><div class="bar"><span></span></div></div></div>
+            <div class="state-row"><span class="label">High</span><div class="spend"><div class="spend-top"><span class="pct">98%</span><span class="amt">$44,120</span></div><div class="bar red"><span></span></div></div></div>
+            <div class="state-row"><span class="label">Maxed</span><div class="spend"><div class="spend-top"><span class="pct">100%</span><span class="amt">$79,985</span></div><div class="bar full"><span></span></div></div></div>
+          </div>
+          <div class="panel">
+            <h2>Segment + Flighting Cells</h2>
+            <div class="state-row"><span class="label">Segment</span><span class="chip"><code>Really Long Seg...</code> (80)</span></div>
+            <div class="state-row"><span class="label">Flight</span><span class="flight">12/31/26 <i class="iconoir iconoir-nav-arrow-right"></i> 12/31/27</span></div>
+            <div class="state-row"><span class="label">Menu</span><span class="dot-menu">...</span></div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="panel" id="atoms">
+            <h2>Atoms</h2>
+            <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>198:3741</code></p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;">
+              <span class="tab active">All Campaigns</span>
+              <span class="badge active">Active</span>
+              <span class="badge ended">Ended</span>
+              <span class="chip"><code>Really Long Seg...</code> (80)</span>
+              <span class="flight">12/31/26 <i data-lucide="arrow-right" style="width:12px;height:12px;vertical-align:middle;"></i> 12/31/27</span>
+              <button class="btn">Settings</button>
+            </div>
+            <ul class="tiny">
+              <li>Tab atom ("All Campaigns", "New Campaign", "+")</li>
+              <li>Status badge atom (Active, Ended)</li>
+              <li>Progress text + bar atoms (82%, 98%, 100%)</li>
+              <li>Segment chip atom with source-code label + count</li>
+              <li>Flight-date value atom and chevron icon atom</li>
+              <li>Overflow menu trigger atom</li>
+            </ul>
+          </article>
+          <article class="panel" id="molecules">
+            <h2>Molecules</h2>
+            <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>198:3741</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:10px; margin:8px 0 10px;">
+              <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Campaign Row Molecule</div>
+              <div class="tr" style="display:grid; grid-template-columns:1fr auto auto; gap:8px;">
+                <div>Campaign Name</div>
+                <span class="badge active">Active</span>
+                <span class="flight">12/31/26 <i data-lucide="arrow-right" style="width:12px;height:12px;vertical-align:middle;"></i> 12/31/27</span>
+              </div>
+            </div>
+            <ul class="tiny">
+              <li>Tab bar molecule (tabs + settings dropdown trigger)</li>
+              <li>Spend meter molecule (percent, amount, colored progress rail)</li>
+              <li>Segment + flighting molecule (segment badge + date range)</li>
+              <li>Campaign table row molecule (name, status, placement, spend, segment, flighting, actions)</li>
+            </ul>
+          </article>
+          <article class="panel" id="compositions">
+            <h2>Compositions</h2>
+            <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>198:3741</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+              <div style="font-weight:600; margin-bottom:8px;">All Campaigns Table Composition</div>
+              <div style="display:grid; gap:8px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <span class="tab active">All Campaigns</span>
+                  <span class="tab">New Campaign</span>
+                  <button class="btn">Settings</button>
+                </div>
+                <div class="tr" style="display:grid; grid-template-columns:1fr auto auto; gap:8px;">
+                  <div>Campaign Name</div>
+                  <span class="badge active">Active</span>
+                  <span class="chip"><code>Really Long Seg...</code> (80)</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Top Tabs (All/New/+)</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Settings Dropdown Trigger</td><td>Yes</td><td>Yes</td><td>Open</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Campaign Status Badge</td><td>Yes</td><td>Yes</td><td>Active/Ended</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Campaign Table Row</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Spend Meter</td><td>Yes</td><td>N/A</td><td>82/98/100%</td><td>N/A</td><td>N/A</td><td>High (red)</td></tr>
+              <tr><td>Segment Chip</td><td>Yes</td><td>Yes</td><td>N/A</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Flighting Range</td><td>Yes</td><td>Yes</td><td>N/A</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Overflow Menu Trigger</td><td>Yes</td><td>Yes</td><td>Open</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segmentation Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #4f46e5;
+      --text-danger: #dc2626;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-default: #e2e8f0;
+      --border-focus: #6366f1;
+      --nav-active-bg: #eef2ff;
+      --nav-active-text: #4338ca;
+      --nav-default-text: #475569;
+      --nav-hover-bg: #f8fafc;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --tab-active-text: #4338ca;
+      --tab-default-bg: #ffffff;
+      --tab-default-border: #e2e8f0;
+      --tab-default-text: #334155;
+      --status-success-bg: #d2f0df;
+      --status-success-text: #11552f;
+      --status-neutral-bg: #e2e8f0;
+      --status-neutral-text: #475569;
+      --status-warning-bg: #fef3c7;
+      --status-warning-text: #92400e;
+      --status-error-bg: #fee2e2;
+      --status-error-text: #991b1b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+    h1, h2, h3, p { margin: 0; }
+    .page { display: grid; gap: 20px; max-width: 1400px; margin: 0 auto; }
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .storybook-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 6px 10px;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .nav-link:hover { background: var(--bg-subtle); }
+    .nav-link.active {
+      border-color: var(--tab-active-border);
+      background: var(--tab-active-bg);
+      color: var(--tab-active-text);
+    }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { font-size: 14px; color: var(--text-secondary); margin-top: 6px; }
+    .tiny { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .state-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+    .label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      min-width: 72px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .chip {
+      border-radius: 8px;
+      padding: 2px 8px;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 20px;
+      font-weight: 500;
+    }
+    .badge { border-radius: 8px; padding: 2px 8px; font-size: 14px; line-height: 22px; font-weight: 500; }
+    .badge.success { background: var(--status-success-bg); color: var(--status-success-text); }
+    .badge.neutral { background: var(--status-neutral-bg); color: var(--status-neutral-text); }
+    .badge.warning { background: var(--status-warning-bg); color: var(--status-warning-text); }
+    .badge.error { background: var(--status-error-bg); color: var(--status-error-text); }
+    .btn-pill {
+      border: 1px solid var(--border-default);
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-pill.hover { filter: brightness(0.98); }
+    .btn-pill.active { background: #e2e8f0; }
+    .btn-pill.focus { outline: 3px solid rgba(99, 102, 241, 0.2); border-color: var(--border-focus); }
+    .btn-pill.disabled { opacity: 0.45; pointer-events: none; }
+    .nav-item {
+      width: 210px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--nav-default-text);
+      font-size: 14px;
+      line-height: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid transparent;
+    }
+    .nav-item .dot { width: 8px; height: 8px; border-radius: 999px; background: currentColor; opacity: 0.6; }
+    .nav-item.hover { background: var(--nav-hover-bg); }
+    .nav-item.selected { background: var(--bg-subtle); color: var(--nav-active-text); font-weight: 500; }
+    .nav-item.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16); }
+    .nav-item.disabled { opacity: 0.45; }
+    .tab {
+      border: 1px solid var(--tab-default-border);
+      background: var(--tab-default-bg);
+      color: var(--tab-default-text);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab.active {
+      background: var(--tab-active-bg);
+      border-color: var(--tab-active-border);
+      color: var(--tab-active-text);
+    }
+    .tab.focus { box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16); }
+    .tab.disabled { opacity: 0.45; }
+    .add-tab { width: 34px; justify-content: center; font-size: 16px; padding: 7px; }
+    .table {
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tr { display: grid; grid-template-columns: 240px 110px 90px 1fr 110px 32px; padding: 12px 16px; border-top: 1px solid var(--border-default); align-items: center; }
+    .tr:first-child { border-top: 0; color: var(--text-muted); font-weight: 500; font-size: 14px; }
+    .segment-name { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+    .segment-name.parent::before,
+    .segment-name.child::before {
+      content: "";
+      width: 2px; height: 14px;
+      border-radius: 2px;
+      margin-right: 8px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .segment-name.parent::before { background: #3730a3; }
+    .segment-name.child::before { background: #4f46e5; }
+    .audience { color: var(--text-link); font-size: 14px; }
+    .edited { color: #64748b; font-size: 14px; }
+    .menu { color: #94a3b8; font-weight: 700; letter-spacing: 2px; text-align: center; }
+    .empty { text-align: center; color: var(--text-muted); padding: 40px 0 8px; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { background: var(--bg-subtle); color: var(--text-secondary); font-weight: 600; }
+    .profile {
+      width: 210px; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px;
+      display: flex; gap: 8px; align-items: center;
+    }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 999px; background: #c4b5fd; color: white;
+      font-size: 11px; font-weight: 600; display: grid; place-items: center;
+    }
+    .profile.disabled { opacity: 0.45; }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail {
+      border-right: 1px solid var(--border-default);
+      background: var(--bg-surface);
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link {
+      display: block;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active {
+      border-color: var(--tab-active-border);
+      background: var(--tab-active-bg);
+      color: var(--tab-active-text);
+    }
+    @media (max-width: 1080px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+    }
+    @media (max-width: 1080px) { .grid { grid-template-columns: 1fr; } .tr { grid-template-columns: 1fr; gap: 8px; } }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link active" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#sidebar-nav-item">Sidebar Navigation Item</a>
+        <a class="rail-link" href="#create-utility-controls">Create + Utility Controls</a>
+        <a class="rail-link" href="#top-tabs-component">Top Tabs</a>
+        <a class="rail-link" href="#status-chips-component">Status + Condition Chips</a>
+        <a class="rail-link" href="#list-rows">Segment List Rows</a>
+        <a class="rail-link" href="#profile-card-component">Profile Card</a>
+        <a class="rail-link" href="#overflow-trigger-component">Overflow Trigger</a>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+    <main class="content-area">
+  <div class="page">
+    <section class="panel">
+      <div class="storybook-nav">
+        <a class="nav-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="nav-link active" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="nav-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="nav-link" href="#sidebar-nav-item">Components</a>
+        <a class="nav-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h1 class="title">Campaign Manager - Segmentation UI Component Reference</h1>
+      <p class="sub">Source: Figma frame `View Segment` + `DESIGN_SYSTEM.md` semantic token rules.</p>
+      <p class="tiny">Includes components found in the provided node and a complete state matrix for implementation and QA reference.</p>
+    </section>
+
+    <section class="grid" id="sidebar-nav">
+      <div class="panel" id="sidebar-nav-item">
+        <h2>Sidebar Navigation Item</h2>
+        <div class="state-row"><span class="label">Default</span><div class="nav-item"><span class="dot"></span>Campaigns</div></div>
+        <div class="state-row"><span class="label">Hover</span><div class="nav-item hover"><span class="dot"></span>Campaigns</div></div>
+        <div class="state-row"><span class="label">Selected</span><div class="nav-item selected"><span class="dot"></span>Segmentation</div></div>
+        <div class="state-row"><span class="label">Focus</span><div class="nav-item focus"><span class="dot"></span>Campaigns</div></div>
+        <div class="state-row"><span class="label">Disabled</span><div class="nav-item disabled"><span class="dot"></span>Data Sources</div></div>
+      </div>
+
+      <div class="panel" id="create-utility-controls">
+        <h2>Create + Utility Controls</h2>
+        <div class="state-row"><span class="label">Default</span><button class="btn-pill">+ Create</button></div>
+        <div class="state-row"><span class="label">Hover</span><button class="btn-pill hover">+ Create</button></div>
+        <div class="state-row"><span class="label">Active</span><button class="btn-pill active">+ Create</button></div>
+        <div class="state-row"><span class="label">Focus</span><button class="btn-pill focus">+ Create</button></div>
+        <div class="state-row"><span class="label">Disabled</span><button class="btn-pill disabled">+ Create</button></div>
+      </div>
+
+      <div class="panel" id="top-tabs-component">
+        <h2>Top Tabs</h2>
+        <div class="state-row">
+          <span class="label">Default</span>
+          <button class="tab">All Segments</button>
+          <button class="tab add-tab">+</button>
+        </div>
+        <div class="state-row">
+          <span class="label">Active</span>
+          <button class="tab active">All Segments</button>
+          <button class="tab add-tab active">+</button>
+        </div>
+        <div class="state-row">
+          <span class="label">Focus</span>
+          <button class="tab focus">All Segments</button>
+        </div>
+        <div class="state-row">
+          <span class="label">Disabled</span>
+          <button class="tab disabled">All Segments</button>
+        </div>
+      </div>
+
+      <div class="panel" id="status-chips-component">
+        <h2>Status Badges + Condition Chips</h2>
+        <div class="state-row"><span class="label">Active</span><span class="badge success">Active</span></div>
+        <div class="state-row"><span class="label">Inactive</span><span class="badge neutral">Inactive</span></div>
+        <div class="state-row"><span class="label">Warning</span><span class="badge warning">Paused</span></div>
+        <div class="state-row"><span class="label">Error</span><span class="badge error">Error</span></div>
+        <div class="state-row"><span class="label">Chip</span><span class="chip">Visited domain: nike.com</span><span class="chip">Last Purchase: &lt;30d</span><span class="chip">+5 More</span></div>
+      </div>
+    </section>
+
+    <section class="panel" id="list-rows">
+      <h2>Segment List Rows (Observed Variants)</h2>
+      <div class="table">
+        <div class="tr">
+          <div>Name</div><div>Status</div><div>Audience</div><div>Conditions</div><div>Edited</div><div></div>
+        </div>
+        <div class="tr">
+          <div class="segment-name">Default Segment</div>
+          <div><span class="badge success">Active</span></div>
+          <div class="audience">200</div>
+          <div><span class="chip">Visited domain: nike.com</span> <span class="chip">Last Purchase: &lt;30d</span></div>
+          <div class="edited">12d ago</div>
+          <div class="menu">...</div>
+        </div>
+        <div class="tr">
+          <div class="segment-name">Default Segment</div>
+          <div><span class="badge neutral">Inactive</span></div>
+          <div class="audience">200</div>
+          <div><span class="chip">Visited domain: nike.com</span></div>
+          <div class="edited">12d ago</div>
+          <div class="menu">...</div>
+        </div>
+        <div class="tr">
+          <div class="segment-name parent">Parent Segment</div>
+          <div><span class="badge success">Active</span></div>
+          <div class="audience">200</div>
+          <div><span class="chip">Visited domain: 1800-flowers.com</span></div>
+          <div class="edited">12d ago</div>
+          <div class="menu">...</div>
+        </div>
+        <div class="tr">
+          <div class="segment-name child">Child Segment</div>
+          <div><span class="badge success">Active</span></div>
+          <div class="audience">200</div>
+          <div><span class="chip">Visited domain: nike.com</span> <span class="chip">Last Purchase: &lt;30d</span> <span class="chip">+5 More</span></div>
+          <div class="edited">12d ago</div>
+          <div class="menu">...</div>
+        </div>
+      </div>
+      <p class="empty">No active campaigns found. Create your first one!</p>
+    </section>
+
+    <section class="grid">
+      <div class="panel" id="profile-card-component">
+        <h2>Profile Card</h2>
+        <div class="state-row"><span class="label">Default</span><div class="profile"><div class="avatar">KL</div><div>Kace Layton</div></div></div>
+        <div class="state-row"><span class="label">Disabled</span><div class="profile disabled"><div class="avatar">KL</div><div>Kace Layton</div></div></div>
+      </div>
+      <div class="panel" id="overflow-trigger-component">
+        <h2>Overflow Trigger</h2>
+        <div class="state-row"><span class="label">Default</span><div class="menu">...</div></div>
+        <div class="state-row"><span class="label">Hover</span><div class="menu" style="color:#64748b;">...</div></div>
+        <div class="state-row"><span class="label">Focus</span><div class="menu" style="border:1px solid var(--border-focus); border-radius:6px; padding:4px 6px;">...</div></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel" id="atoms">
+        <h2>Atoms</h2>
+        <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+        <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+        <p class="tiny">Figma source node: <code>226:12430</code></p>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;">
+          <button class="btn-pill">+ Create</button>
+          <span class="tab active">All Segments</span>
+          <span class="badge success">Active</span>
+          <span class="badge neutral">Inactive</span>
+          <span class="chip">Visited domain: nike.com</span>
+          <span class="chip">Last Purchase: &lt;30d</span>
+          <span class="chip">+5 More</span>
+        </div>
+        <ul class="tiny">
+          <li>Create pill button atom</li>
+          <li>Tab atom and add-tab atom</li>
+          <li>Status badge atoms (Active, Inactive)</li>
+          <li>Condition chip atoms (domain, purchase window, overflow chip)</li>
+          <li>Hierarchy indicator atoms (parent and child segment markers)</li>
+          <li>Overflow menu trigger atom</li>
+        </ul>
+      </article>
+      <article class="panel" id="molecules">
+        <h2>Molecules</h2>
+        <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+        <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+        <p class="tiny">Figma source node: <code>226:12430</code></p>
+        <div style="border:1px solid var(--border-default); border-radius:10px; padding:10px; margin:8px 0 10px;">
+          <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Segment Row Molecule</div>
+          <div class="tr" style="display:grid; grid-template-columns:1fr auto auto; gap:8px;">
+            <div>Parent Segment</div>
+            <span class="badge success">Active</span>
+            <span class="chip">Visited domain: 1800-flowers.com</span>
+          </div>
+        </div>
+        <ul class="tiny">
+          <li>Sidebar navigation item molecule (icon + label + selected background)</li>
+          <li>Top controls molecule (create button + previous/next controls)</li>
+          <li>Segment table row molecule (name, status, audience, conditions, edited, overflow)</li>
+          <li>Nested segment molecule (parent/child indentation + lineage markers)</li>
+          <li>User profile card molecule (avatar initials + name)</li>
+        </ul>
+      </article>
+      <article class="panel" id="compositions">
+        <h2>Compositions</h2>
+        <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+        <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+        <p class="tiny">Figma source node: <code>226:12430</code></p>
+        <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+          <div style="font-weight:600; margin-bottom:8px;">Segmentation List Composition</div>
+          <div style="display:grid; gap:8px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;"><span class="tab active">All Segments</span><span class="tab">+</span></div>
+            <div class="tr" style="display:grid; grid-template-columns:1fr auto auto; gap:8px;">
+              <div>Child Segment</div>
+              <span class="badge success">Active</span>
+              <span class="chip">+5 More</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" id="state-matrix">
+      <h2>State Coverage Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Default</th>
+            <th>Hover</th>
+            <th>Active/Selected</th>
+            <th>Focus</th>
+            <th>Disabled</th>
+            <th>Error</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Sidebar Nav Item</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+          <tr><td>Create Button (Pill)</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+          <tr><td>Top Tab / Add Tab</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+          <tr><td>Status Badge</td><td>Yes</td><td>N/A</td><td>Yes</td><td>N/A</td><td>N/A</td><td>Yes</td></tr>
+          <tr><td>Condition Chip</td><td>Yes</td><td>Yes</td><td>N/A</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+          <tr><td>Segment Row</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td>Profile Card</td><td>Yes</td><td>Yes</td><td>N/A</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+          <tr><td>Overflow Trigger</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+        </tbody>
+      </table>
+      <p class="tiny">"Error" is included where a component can meaningfully represent validation/system failure according to your design-system state rules.</p>
+    </section>
+  </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

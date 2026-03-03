@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segmentation Filter Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #4f46e5;
+      --text-danger: #dc2626;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-overlay: #0f172a;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+      --tab-active-bg: #e2e8f0;
+      --tab-active-border: #cbd5e1;
+      --tab-default-bg: #ffffff;
+      --tab-default-border: #d9d9d9;
+      --tab-default-text: #334155;
+      --input-ring: rgba(99, 102, 241, 0.2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+    h1, h2, p { margin: 0; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail {
+      border-right: 1px solid var(--border-default);
+      background: var(--bg-surface);
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link {
+      display: block;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); color: var(--text-primary); }
+    .page { max-width: 1400px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tiny { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .state-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .label { min-width: 84px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
+    .tab {
+      border-radius: 8px; border: 1px solid var(--tab-default-border); background: var(--tab-default-bg);
+      color: var(--tab-default-text); font-size: 13px; font-weight: 500; padding: 8px 10px; display: inline-flex; gap: 8px; align-items: center;
+    }
+    .tab.active { background: var(--tab-active-bg); border-color: var(--tab-active-border); color: var(--text-primary); }
+    .tab.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .tab.disabled { opacity: .45; }
+    .toggle { width: 44px; height: 24px; border-radius: 999px; padding: 3px; border: 1px solid var(--border-default); background: var(--bg-subtle); display: inline-flex; align-items: center; }
+    .toggle .knob { width: 18px; height: 18px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+    .toggle.on { justify-content: flex-end; background: var(--text-link); border-color: var(--text-link); }
+    .toggle.off { justify-content: flex-start; }
+    .toggle.focus { box-shadow: 0 0 0 3px var(--input-ring); }
+    .condition-block {
+      border: 1px solid var(--border-default);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: var(--bg-surface);
+    }
+    .field {
+      height: 42px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      background: var(--bg-surface);
+      display: inline-flex;
+      align-items: center;
+      padding: 0 10px;
+      color: var(--text-primary);
+      font-size: 14px;
+      min-width: 160px;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .field.placeholder { color: #9ca3af; justify-content: flex-start; }
+    .field.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .field.error { border-color: var(--text-danger); color: var(--text-danger); }
+    .icon-btn {
+      width: 20px; height: 20px; border-radius: 6px; border: 1px solid transparent;
+      display: inline-flex; align-items: center; justify-content: center; color: #64748b; font-size: 12px;
+    }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    .icon-btn .iconoir { font-size: 12px; }
+    .icon-btn.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .connector {
+      display: grid; justify-items: center; gap: 4px; color: var(--text-secondary);
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+      width: 42px;
+    }
+    .line { width: 1px; height: 8px; background: var(--border-strong); }
+    .add-condition {
+      height: 56px; border: 1px dashed var(--border-strong); border-radius: 16px; display: grid; place-items: center;
+      color: #64748b; font-size: 14px; font-weight: 500; background: var(--bg-page);
+    }
+    .add-condition.hover { background: var(--bg-subtle); border-style: solid; }
+    .add-condition.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .btn {
+      border-radius: 6px; border: 1px solid transparent; padding: 10px 24px; font-size: 14px; font-weight: 500; background: transparent; color: #595959;
+    }
+    .btn.hover { background: var(--bg-subtle); }
+    .btn.primary { background: var(--bg-overlay); color: #fff; }
+    .btn.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .btn.disabled { opacity: .45; }
+    .summary-card { background: var(--bg-subtle); border-radius: 16px; padding: 16px; }
+    .summary-top { display: flex; gap: 8px; align-items: baseline; }
+    .summary-value { font-size: 28px; font-weight: 600; }
+    .summary-label { font-size: 11px; color: var(--text-secondary); }
+    .summary-split { margin: 14px 0; border-top: 1px solid var(--border-default); }
+    .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .kpi-title { font-size: 26px; font-weight: 600; }
+    .kpi-sub { font-size: 11px; color: var(--text-secondary); }
+    .stack { width: 100%; border-radius: 6px; overflow: hidden; height: 18px; background: var(--bg-subtle); display: grid; grid-template-columns: 45% 55%; }
+    .stack .d1 { background: var(--text-primary); } .stack .d2 { background: #94a3b8; }
+    .legend-pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; padding: 4px 8px; background: var(--bg-subtle); font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; }
+    .table { border: 1px solid var(--border-default); border-radius: 8px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th, td { border-top: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { border-top: none; background: #fff; color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: .02em; }
+    .status-dot { width: 6px; height: 6px; border-radius: 999px; background: #10b981; display: inline-block; }
+    .status-dot.neutral { background: #cbd5e1; }
+    .skeleton { background: #e2e8f0; height: 8px; border-radius: 4px; display: inline-block; }
+    .w40 { width: 40px; } .w80 { width: 80px; }
+    @media (max-width: 1080px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+      .grid { grid-template-columns: 1fr; }
+      .condition-block { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link active" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#filters">Filter Builder</a>
+        <a class="rail-link" href="#audience-rail">Audience Rail</a>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - New Segment (Filter Builder) Reference</h1>
+          <p class="sub">Source: Figma node `226:12449` using standard condition-builder mode (SQL toggle off).</p>
+          <p class="tiny">Includes rule rows, logical connector block, add-condition interaction, actions, and analytics side rail.</p>
+        </section>
+
+        <section class="grid" id="filters">
+          <div class="panel">
+            <h2>Top Tabs + SQL Toggle</h2>
+            <div class="state-row"><span class="label">Tab Default</span><span class="tab">All Segments</span><span class="tab active">New Segment <i class="iconoir iconoir-cancel"></i></span><span class="tab">+</span></div>
+            <div class="state-row"><span class="label">Tab Focus</span><span class="tab focus">All Segments</span></div>
+            <div class="state-row"><span class="label">Toggle Off</span><span class="toggle off"><span class="knob"></span></span><span>SQL mode</span></div>
+            <div class="state-row"><span class="label">Toggle On</span><span class="toggle on"><span class="knob"></span></span><span>SQL mode</span></div>
+            <div class="state-row"><span class="label">Toggle Focus</span><span class="toggle off focus"><span class="knob"></span></span></div>
+          </div>
+
+          <div class="panel">
+            <h2>Condition Row: Default</h2>
+            <div class="condition-block">
+              <div class="field">URL Contains <span><i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+              <div class="field placeholder" style="flex:1;">e.g. macys.com</div>
+              <div class="icon-btn"><i class="iconoir iconoir-trash"></i></div>
+            </div>
+            <div class="state-row"><span class="label">Hover</span><div class="condition-block" style="background:var(--bg-subtle); width:100%;"><div class="field">URL Contains <span><i class="iconoir iconoir-nav-arrow-down"></i></span></div><div class="field placeholder" style="flex:1;">e.g. macys.com</div><div class="icon-btn"><i class="iconoir iconoir-trash"></i></div></div></div>
+            <div class="state-row"><span class="label">Focus</span><div class="condition-block" style="width:100%;"><div class="field focus">URL Contains <span><i class="iconoir iconoir-nav-arrow-down"></i></span></div><div class="field focus" style="flex:1;">macys.com</div><div class="icon-btn focus"><i class="iconoir iconoir-trash"></i></div></div></div>
+            <div class="state-row"><span class="label">Error</span><div class="condition-block" style="width:100%;"><div class="field">URL Contains <span><i class="iconoir iconoir-nav-arrow-down"></i></span></div><div class="field error" style="flex:1;">Invalid value</div><div class="icon-btn"><i class="iconoir iconoir-trash"></i></div></div></div>
+          </div>
+
+          <div class="panel">
+            <h2>Condition Connector + Operator Edit</h2>
+            <div class="state-row">
+              <span class="label">Default</span>
+              <div class="connector"><span class="line"></span><span>AND <i class="iconoir iconoir-edit-pencil"></i></span><span class="line"></span></div>
+            </div>
+            <div class="state-row">
+              <span class="label">Alt</span>
+              <div class="connector"><span class="line"></span><span>OR <i class="iconoir iconoir-edit-pencil"></i></span><span class="line"></span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Add Another Condition</h2>
+            <div class="state-row"><span class="label">Default</span><div class="add-condition" style="width:100%;">Add another condition</div></div>
+            <div class="state-row"><span class="label">Hover</span><div class="add-condition hover" style="width:100%;">Add another condition</div></div>
+            <div class="state-row"><span class="label">Focus</span><div class="add-condition focus" style="width:100%;">Add another condition</div></div>
+            <div class="state-row"><span class="label">Disabled</span><div class="add-condition" style="width:100%; opacity:.45;">Add another condition</div></div>
+          </div>
+        </section>
+
+        <section class="grid" id="audience-rail">
+          <div class="panel">
+            <h2>Action Bar Buttons</h2>
+            <div class="state-row"><span class="label">Default</span><button class="btn">Cancel</button><button class="btn primary">Save Campaign</button></div>
+            <div class="state-row"><span class="label">Hover</span><button class="btn hover">Cancel</button><button class="btn primary" style="filter:brightness(.95);">Save Campaign</button></div>
+            <div class="state-row"><span class="label">Focus</span><button class="btn focus">Cancel</button><button class="btn primary focus">Save Campaign</button></div>
+            <div class="state-row"><span class="label">Disabled</span><button class="btn disabled">Cancel</button><button class="btn primary disabled">Save Campaign</button></div>
+          </div>
+
+          <div class="panel">
+            <h2>Audience Summary + Device Type</h2>
+            <div class="summary-card">
+              <div class="summary-top"><div class="summary-value">18,000</div><div class="summary-label">Est. Audience</div></div>
+              <div class="summary-split"></div>
+              <div class="kpi-row">
+                <div><div class="kpi-title">~2.4M</div><div class="kpi-sub">Impressions (30 days)</div></div>
+                <div style="border-left:1px solid var(--border-default); padding-left:12px;"><div class="kpi-title">~80k</div><div class="kpi-sub">Avg. Daily Reach</div></div>
+              </div>
+            </div>
+            <div class="state-row"><span class="label">Chart</span><div style="flex:1;"><div class="stack"><div class="d1"></div><div class="d2"></div></div></div></div>
+            <div class="state-row"><span class="label">Legend</span><span class="legend-pill"><span class="dot" style="background:#0f172a;"></span>Desktop 45%</span><span class="legend-pill"><span class="dot" style="background:#94a3b8;"></span>Mobile 50%</span></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Audience Preview Table</h2>
+          <div class="table">
+            <table>
+              <thead><tr><th>XID</th><th>Active</th><th>Summary</th></tr></thead>
+              <tbody>
+                <tr><td>#AF902</td><td><span class="status-dot"></span></td><td>High-Value Tech Enth...</td></tr>
+                <tr><td>#BF881</td><td><span class="status-dot"></span></td><td>Retention Risk / Seasonal</td></tr>
+                <tr><td><span class="skeleton w40"></span></td><td><span class="status-dot neutral"></span></td><td><span class="skeleton w80"></span></td></tr>
+                <tr><td>#C9012</td><td><span class="status-dot neutral"></span></td><td>New Signup (Pending)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="panel" id="atoms">
+            <h2>Atoms</h2>
+            <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>226:12449</code></p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;">
+              <span class="tab active">New Segment</span>
+              <span class="toggle"><span class="knob"></span></span>
+              <input type="text" value="e.g. macys.com" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              <span class="chip">AND</span>
+              <button class="btn">Add another condition</button>
+            </div>
+            <ul class="tiny">
+              <li>Tab atoms and add-tab atom</li>
+              <li>SQL mode toggle atoms (off state shown)</li>
+              <li>Condition dropdown atom ("URL Contains", "CSS Selector")</li>
+              <li>Value input atom and delete icon atom</li>
+              <li>Connector atoms ("AND", row divider)</li>
+              <li>Footer button atoms (Cancel, Save Campaign)</li>
+            </ul>
+          </article>
+          <article class="panel" id="molecules">
+            <h2>Molecules</h2>
+            <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>226:12449</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:10px; margin:8px 0 10px;">
+              <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Filter Condition Row Molecule</div>
+              <div style="display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;">
+                <span class="chip">URL Contains</span>
+                <input type="text" value="e.g. macys.com" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                <button class="btn">Delete</button>
+              </div>
+            </div>
+            <ul class="tiny">
+              <li>Filter-row molecule (operator select + value input + delete action)</li>
+              <li>Condition-builder molecule (row stack + AND connector + add-row action)</li>
+              <li>Frequency/cooldown molecule (numeric controls + unit selects + remove action)</li>
+              <li>Audience summary rail molecule (est audience and KPI stack)</li>
+              <li>Audience preview table molecule (xid/status/summary rows)</li>
+            </ul>
+          </article>
+          <article class="panel" id="compositions">
+            <h2>Compositions</h2>
+            <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source node: <code>226:12449</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+              <div style="font-weight:600; margin-bottom:8px;">Rule-based Segment Builder Composition</div>
+              <div style="display:grid; gap:8px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;"><span class="tab active">New Segment</span><span class="toggle"><span class="knob"></span></span></div>
+                <div style="display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;">
+                  <span class="chip">URL Contains</span>
+                  <input type="text" value="&lt;&gt;" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                  <button class="btn primary">Save Campaign</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Top Tabs</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>SQL Toggle</td><td>Yes</td><td>Yes</td><td>On/Off</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Condition Row Wrapper</td><td>Yes</td><td>Yes</td><td>Editing</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Dropdown Field</td><td>Yes</td><td>Yes</td><td>Open</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Value Input</td><td>Yes</td><td>Yes</td><td>Typing</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Delete Icon Button</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>AND/OR Connector</td><td>Yes</td><td>Yes</td><td>AND/OR</td><td>Yes</td><td>N/A</td><td>N/A</td></tr>
+              <tr><td>Add Condition Row</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Action Buttons</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Audience Summary + Chart</td><td>Yes</td><td>N/A</td><td>N/A</td><td>N/A</td><td>Loading</td><td>Yes</td></tr>
+              <tr><td>Audience Preview Table</td><td>Yes</td><td>Yes</td><td>Row selected</td><td>Yes</td><td>Skeleton</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>

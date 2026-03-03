@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Atoms Component Library</title>
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #2563eb;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-text: #4338ca;
+      --tab-active-border: #4f46e5;
+      --progress: #334155;
+      --danger: #ef4444;
+      --warn-bg: #fef3c7;
+      --warn-text: #92400e;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --scheduled-bg: #e0e7ff;
+      --scheduled-text: #3730a3;
+      --ended-bg: #e2e8f0;
+      --ended-text: #475569;
+      --metric-green: #16a34a;
+      --bg-overlay: #0f172a;
+      --input-ring: rgba(99, 102, 241, 0.2);
+      --nav-active-bg: #eef2ff;
+      --nav-active-text: #4338ca;
+      --nav-default-text: #475569;
+      --nav-hover-bg: #f8fafc;
+      --tab-default-bg: #ffffff;
+      --tab-default-border: #e2e8f0;
+      --tab-default-text: #334155;
+      --status-success-bg: #d2f0df;
+      --status-success-text: #11552f;
+      --status-neutral-bg: #e2e8f0;
+      --status-neutral-text: #475569;
+      --status-warning-bg: #fef3c7;
+      --status-warning-text: #92400e;
+      --status-error-bg: #fee2e2;
+      --status-error-text: #991b1b;
+      --text-danger: #dc2626;
+      --card-selected: #f1f5f9;
+      --chart-bar: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail {
+      border-right: 1px solid var(--border-default);
+      background: var(--bg-surface);
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .content-area { padding: 32px 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; margin: 2px 0 6px; }
+    .rail-link {
+      display: block;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { background: var(--tab-active-bg); color: var(--tab-active-text); border-color: var(--tab-active-border); }
+    .page { max-width: 1240px; margin: 0 auto; display: grid; gap: 16px; }
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .section-header { margin-bottom: 8px; padding-bottom: 20px; border-bottom: 1px solid var(--border-default); }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 0 0 4px; font-weight: 600; }
+    .title { margin: 0; font-size: 24px; font-weight: 700; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .content-section { margin-bottom: 40px; padding-top: 8px; }
+    .content-section:last-child { margin-bottom: 0; }
+    .content-section > .panel { margin-bottom: 16px; }
+    .content-section > .panel:last-child { margin-bottom: 0; }
+    .subsection { margin-top: 20px; }
+    .subsection:first-child { margin-top: 12px; }
+
+    .chip-link {
+      border: 1px solid var(--border-default);
+      border-radius: 999px;
+      padding: 6px 10px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 12px;
+      background: var(--bg-surface);
+    }
+    .chip-link:hover { background: var(--bg-subtle); }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .card {
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      background: var(--bg-surface);
+    }
+    .card h2, .card h3 { margin: 0; font-size: 15px; font-weight: 600; }
+    .tiny { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.4; }
+    .demo {
+      border: 1px dashed var(--border-default);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      min-height: 54px;
+    }
+    .tag { border: 1px solid var(--border-default); border-radius: 999px; padding: 5px 10px; font-size: 12px; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px; }
+    .badge { border: 1px solid #86efac; color: #166534; background: #f0fdf4; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 600; }
+    .status-pill { border: 1px solid #dbeafe; color: #1d4ed8; background: #eff6ff; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 600; }
+    .btn { border-radius: 6px; border: 1px solid var(--border-default); padding: 10px 24px; font-size: 14px; font-weight: 500; background: #fff; color: #595959; }
+    .btn.hover { background: var(--bg-subtle); }
+    .btn.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .btn.disabled { opacity: 0.45; pointer-events: none; }
+    .btn.primary { border-color: transparent; background: var(--bg-overlay); color: #fff; display: inline-flex; align-items: center; gap: 8px; }
+    .btn.primary.hover { filter: brightness(0.95); }
+    .btn.primary.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .btn.primary.disabled { opacity: 0.45; pointer-events: none; }
+    .btn.link { border: 0; padding: 0; background: transparent; color: var(--text-link); }
+    .state-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .state-row .label { min-width: 80px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
+    .icon-btn { width: 30px; height: 30px; border: 1px solid var(--border-default); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary); background: #fff; }
+    .input, .select, .date, .time, .textarea {
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text-primary);
+      font-size: 14px;
+      padding: 8px 10px;
+    }
+    .input:not(.textarea) {
+      min-height: 42px;
+      padding: 10px 12px;
+      display: inline-flex;
+      align-items: center;
+      line-height: 20px;
+    }
+    .input.placeholder { color: var(--text-muted); }
+    .input.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .input.error { border-color: var(--text-danger); color: var(--text-danger); }
+    .input.disabled { opacity: 0.5; background: var(--bg-subtle); }
+    .textarea { min-height: 52px; min-width: 190px; }
+    .input.textarea { min-height: 96px; width: 100%; font-family: Menlo, monospace; color: #9ca3af; line-height: 20px; font-size: 13px; }
+    .input.textarea.form { font-family: Inter, sans-serif; min-height: 86px; color: #334155; }
+    .input.textarea.form.placeholder { color: #6b7280; }
+    .field-wrap { display: grid; gap: 4px; width: 100%; }
+    .label-row { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+    .label-row .req { color: var(--text-danger); }
+    .select.form { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 42px; min-height: 42px; max-height: 42px; padding: 10px 12px; border: 1px solid var(--border-strong); box-sizing: border-box; overflow: hidden; }
+    .select.form .meta { display: grid; gap: 2px; }
+    .select.form .meta .main { font-size: 14px; color: var(--text-primary); }
+    .select.form .meta .subtxt { font-size: 12px; color: var(--text-secondary); }
+    .icon-pill { width: 22px; height: 22px; border-radius: 8px; background: var(--bg-subtle); display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 12px; margin-right: 8px; }
+    .inline { display: inline-flex; align-items: center; }
+    .stack { display: grid; gap: 10px; }
+    .datetime-input { height: 42px; min-height: 42px; max-height: 42px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 0 12px; background: #fff; color: var(--text-primary); font-size: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-sizing: border-box; }
+    .datetime-input.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .datetime-input.error { border-color: var(--text-danger); color: var(--text-danger); }
+    .inc-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .inc-card { border: 1px solid var(--border-default); border-radius: 12px; padding: 12px; min-height: 102px; display: grid; gap: 8px; }
+    .inc-card.selected { background: var(--card-selected); }
+    .inc-head { display: flex; justify-content: space-between; align-items: center; }
+    .radio { width: 14px; height: 14px; border: 1px solid #94a3b8; border-radius: 999px; display: inline-block; }
+    .radio.on { border-color: #0f172a; box-shadow: inset 0 0 0 3px #0f172a; }
+    .inc-title { font-weight: 500; font-size: 14px; }
+    .inc-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.3; }
+    .token-input { height: 42px; min-height: 42px; max-height: 42px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 0 12px; background: #fff; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; overflow: hidden; box-sizing: border-box; }
+    .token-input .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 0; }
+    .token-chip { border-radius: 8px; padding: 4px 8px; background: var(--bg-subtle); color: var(--text-secondary); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+    .code { display: inline-flex; padding: 0 4px; background: var(--bg-subtle); border-radius: 4px; font-family: Menlo, monospace; font-size: 12px; color: #64748b; }
+    .tab { border: 1px solid var(--border-default); border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--text-secondary); }
+    .progress { width: 120px; height: 8px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+    .progress > span { display: block; height: 100%; width: 60%; background: #22c55e; }
+    .toggle { position: relative; width: 36px; height: 20px; border-radius: 999px; background: #6366f1; }
+    .toggle::after { content: ""; position: absolute; top: 2px; left: 18px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+    .toggle-sql { width: 44px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; padding: 3px; border: 1px solid var(--border-default); background: var(--bg-subtle); }
+    .toggle-sql .knob { width: 18px; height: 18px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.15); flex-shrink: 0; }
+    .toggle-sql.on { background: var(--text-link); border-color: var(--text-link); justify-content: flex-end; }
+    .toggle-sql.off { justify-content: flex-start; }
+    .toggle-sql.focus { box-shadow: 0 0 0 3px var(--input-ring); }
+    .value { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .seen { display: flex; flex-wrap: wrap; gap: 6px; }
+    .seen a { text-decoration: none; font-size: 11px; border: 1px solid var(--border-default); border-radius: 999px; padding: 4px 8px; color: var(--text-secondary); }
+    .seen a:hover { background: var(--bg-subtle); }
+    .btn-pill { background: var(--bg-subtle); border: 1px solid var(--border-default); border-radius: 999px; padding: 6px 16px; font-size: 14px; font-weight: 500; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px; }
+    .btn-pill.hover { filter: brightness(0.98); }
+    .btn-pill.active { background: #e2e8f0; }
+    .btn-pill.focus { outline: 3px solid rgba(99, 102, 241, 0.2); border-color: var(--border-focus); }
+    .btn-pill.disabled { opacity: 0.45; pointer-events: none; }
+    .nav-item { width: 210px; border-radius: 8px; padding: 10px 12px; color: var(--nav-default-text); font-size: 14px; line-height: 22px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid transparent; }
+    .nav-item .dot { width: 8px; height: 8px; border-radius: 999px; background: currentColor; opacity: 0.6; }
+    .nav-item.hover { background: var(--nav-hover-bg); }
+    .nav-item.selected { background: var(--bg-subtle); color: var(--nav-active-text); font-weight: 500; }
+    .nav-item.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16); }
+    .nav-item.disabled { opacity: 0.45; }
+    .tab-nav { border: 1px solid var(--tab-default-border); background: var(--tab-default-bg); color: var(--tab-default-text); border-radius: 8px; font-size: 13px; font-weight: 500; padding: 8px 10px; display: inline-flex; align-items: center; gap: 8px; }
+    .tab-nav.active { background: var(--tab-active-bg); border-color: var(--tab-active-border); color: var(--tab-active-text); }
+    .tab-nav.focus { box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16); }
+    .tab-nav.disabled { opacity: 0.45; }
+    .add-tab { width: 34px; justify-content: center; font-size: 16px; padding: 7px; }
+    .tab-bar-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .tab-bar-label { background: var(--tab-active-bg); color: var(--tab-active-text); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; padding: 3px 8px; border-radius: 4px; margin-bottom: 12px; display: inline-block; }
+    .tab-closable { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; height: 34px; border-radius: 8px; border: 1px solid #d9d9d9; background: var(--bg-surface); color: var(--text-primary); font-size: 14px; font-weight: 500; }
+    .tab-closable.active { background: var(--bg-subtle); border-color: var(--border-strong); }
+    .tab-closable .tab-text { color: var(--text-primary); }
+    .tab-closable:not(.active) .tab-text { color: var(--text-secondary); }
+    .tab-closable .tab-close { color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .badge-success { background: var(--status-success-bg); color: var(--status-success-text); border-radius: 8px; padding: 2px 8px; font-size: 14px; font-weight: 500; }
+    .badge-neutral { background: var(--status-neutral-bg); color: var(--status-neutral-text); border-radius: 8px; padding: 2px 8px; font-size: 14px; font-weight: 500; }
+    .badge-warning { background: var(--status-warning-bg); color: var(--status-warning-text); border-radius: 8px; padding: 2px 8px; font-size: 14px; font-weight: 500; }
+    .badge-error { background: var(--status-error-bg); color: var(--status-error-text); border-radius: 8px; padding: 2px 8px; font-size: 14px; font-weight: 500; }
+    .chip-condition { border-radius: 8px; padding: 2px 8px; background: var(--bg-subtle); color: var(--text-secondary); font-size: 13px; font-weight: 500; }
+    .warn-chip { border-radius: 8px; background: #fef3c7; color: #92400e; padding: 8px 12px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 12px; }
+    .burn-chip { border-radius: 8px; background: #fef3c7; padding: 8px 10px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 16px; }
+    .burn-chip .meta { color: var(--text-secondary); }
+    .burn-rate-chip { border-radius: 8px; background: #fbbf24; padding: 8px 16px 8px 8px; font-size: 13px; font-weight: 500; line-height: 20px; display: inline-flex; align-items: center; gap: 16px; color: var(--text-primary); }
+    .burn-rate-chip .meta { color: var(--text-secondary); }
+    .filter { border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-subtle); color: var(--text-secondary); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+    .search { min-height: 40px; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 12px; color: #94a3b8; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; }
+    .meter { width: 86px; height: 6px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+    .meter > span { display: block; height: 100%; background: #334155; }
+    .meter.danger > span { background: #ef4444; }
+    .pill-tab { border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-subtle); color: var(--text-secondary); padding: 5px 10px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; width: fit-content; }
+    .pill-tab.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+    .flight { font-size: 13px; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px; }
+    .spend { width: 116px; display: grid; gap: 4px; }
+    .spend-top { display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; }
+    .spend-top .pct { color: var(--text-muted); }
+    .spend-top .amt { color: var(--text-primary); }
+    .bar { height: 6px; border-radius: 12px; overflow: hidden; background: var(--bg-subtle); }
+    .bar > span { display: block; height: 100%; background: #475569; border-radius: 12px; width: 82%; }
+    .bar.red > span { background: #ef4444; width: 98%; }
+    .bar.full > span { width: 100%; background: #94a3b8; }
+    .bar-metric { height: 20px; border-radius: 8px; overflow: hidden; background: var(--bg-subtle); min-width: 80px; }
+    .bar-metric > span { display: block; height: 100%; background: var(--chart-bar); border-radius: 8px; }
+    .atom-card { border: 1px solid var(--border-default); border-radius: 10px; padding: 12px; display: grid; gap: 8px; background: var(--bg-surface); }
+    .atom-card .name { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); font-weight: 600; }
+    .progress-wrap { border: 1px solid var(--border-default); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
+    .progress-wrap .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .progress-bar { height: 12px; border-radius: 999px; background: #e5e7eb; overflow: hidden; }
+    .progress-bar > span { display: block; height: 100%; width: 65%; background: var(--chart-bar); border-radius: 999px; }
+    .pace-note { border-radius: 14px; background: var(--bg-subtle); padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-style: italic; }
+    .progress-wrap .k { font-size: 12px; color: var(--text-secondary); }
+    .progress-wrap .v { font-size: 14px; font-weight: 500; }
+    .chip { border-radius: 8px; padding: 3px 8px; background: var(--bg-subtle); font-size: 13px; line-height: 20px; color: var(--text-secondary); display: inline-flex; gap: 4px; align-items: center; }
+    .chip code { font-family: "Source Code Pro", Menlo, monospace; font-size: 13px; color: var(--text-secondary); }
+    .chip-segment { border-radius: 8px; padding: 3px 8px; background: var(--bg-subtle); font-size: 13px; line-height: 20px; color: var(--text-secondary); display: inline-flex; gap: 4px; align-items: center; }
+    .chip-segment code { font-family: "Source Code Pro", Menlo, monospace; font-size: 13px; color: var(--text-secondary); }
+    .dot-menu { color: #94a3b8; letter-spacing: 2px; font-weight: 700; }
+    .segment-chip { background: var(--bg-subtle); border-radius: 8px; padding: 2px 8px; font-size: 13px; font-weight: 500; font-family: "Source Code Pro", monospace; }
+    .badge-ended { background: #e2e8f0; color: #475569; border-radius: 8px; padding: 2px 8px; font-size: 14px; font-weight: 500; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+    .status-dot.neutral { background: #94a3b8; }
+    .code-token { font-family: "Source Code Pro", monospace; font-size: 12px; color: var(--text-secondary); }
+    @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 900px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link active" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#actions">1. Actions</a>
+        <a class="rail-link" href="#navigation">2. Navigation</a>
+        <a class="rail-link" href="#inputs">3. Inputs</a>
+        <a class="rail-link" href="#data">4. Data</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <header class="panel section-header">
+          <h1 class="title">Global Atoms Component Library</h1>
+          <p class="sub">Deduplicated atom inventory used across all component reference pages. Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+          <div class="chips">
+            <a class="chip-link" href="#actions">Actions</a>
+            <a class="chip-link" href="#navigation">Navigation</a>
+            <a class="chip-link" href="#inputs">Inputs</a>
+            <a class="chip-link" href="#data">Data</a>
+          </div>
+        </header>
+
+        <div class="content-section" id="actions">
+        <section class="panel">
+          <p class="section-title">1. Actions</p>
+          <h2 style="margin:0 0 4px; font-size:18px; font-weight:600;">Primary &amp; Secondary Buttons</h2>
+          <div id="action-buttons-component" style="margin-top:12px;">
+            <h3 style="margin:0 0 8px; font-size:15px; font-weight:500; color:var(--text-secondary);">Action Buttons</h3>
+            <div class="state-row"><span class="label">DEFAULT</span><button class="btn">Cancel</button><button class="btn primary">Save Campaign</button></div>
+            <div class="state-row"><span class="label">HOVER</span><button class="btn hover">Cancel</button><button class="btn primary hover">Save Campaign</button></div>
+            <div class="state-row"><span class="label">FOCUS</span><button class="btn focus">Cancel</button><button class="btn primary focus">Save Campaign</button></div>
+            <div class="state-row"><span class="label">DISABLED</span><button class="btn disabled">Cancel</button><button class="btn primary disabled">Save Campaign</button></div>
+            <p class="tiny" style="margin-top:12px;">Secondary (Cancel) and primary (Save Campaign) button states. Seen on: <a href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html#action-buttons-component">Segmentation SQL</a>, <a href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html#atoms">Segmentation Filter</a>, <a href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html#atoms">Details</a>, <a href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html#atoms">Budgeting</a>, <a href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html#atoms">Review</a>.</p>
+          </div>
+        </section>
+        </div>
+
+        <div class="content-section" id="navigation">
+        <section class="panel" id="sidebar-nav">
+          <p class="section-title">2. Navigation</p>
+          <h2 style="margin:0 0 4px; font-size:18px; font-weight:600;">Sidebar, Tabs &amp; Status</h2>
+          <div class="grid" style="margin-top:12px; grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <div class="panel" id="sidebar-nav-item" style="padding:12px;">
+              <h3 style="margin:0 0 8px; font-size:14px;">Sidebar Navigation Item</h3>
+              <div class="state-row"><span class="label">DEFAULT</span><div class="nav-item"><span class="dot"></span>Campaigns</div></div>
+              <div class="state-row"><span class="label">HOVER</span><div class="nav-item hover"><span class="dot"></span>Campaigns</div></div>
+              <div class="state-row"><span class="label">SELECTED</span><div class="nav-item selected"><span class="dot"></span>Segmentation</div></div>
+              <div class="state-row"><span class="label">FOCUS</span><div class="nav-item focus"><span class="dot"></span>Campaigns</div></div>
+              <div class="state-row"><span class="label">DISABLED</span><div class="nav-item disabled"><span class="dot"></span>Data Sources</div></div>
+            </div>
+            <div class="panel" id="create-utility-controls" style="padding:12px;">
+              <h3 style="margin:0 0 8px; font-size:14px;">Create + Utility Controls</h3>
+              <div class="state-row"><span class="label">DEFAULT</span><button class="btn-pill">+ Create</button></div>
+              <div class="state-row"><span class="label">HOVER</span><button class="btn-pill hover">+ Create</button></div>
+              <div class="state-row"><span class="label">ACTIVE</span><button class="btn-pill active">+ Create</button></div>
+              <div class="state-row"><span class="label">FOCUS</span><button class="btn-pill focus">+ Create</button></div>
+              <div class="state-row"><span class="label">DISABLED</span><button class="btn-pill disabled">+ Create</button></div>
+            </div>
+            <div class="panel" id="status-chips-component" style="padding:12px;">
+              <h3 style="margin:0 0 8px; font-size:14px;">Status Badges + Condition Chips</h3>
+              <div class="state-row"><span class="label">ACTIVE</span><span class="badge-success">Active</span></div>
+              <div class="state-row"><span class="label">INACTIVE</span><span class="badge-neutral">Inactive</span></div>
+              <div class="state-row"><span class="label">WARNING</span><span class="badge-warning">Paused</span></div>
+              <div class="state-row"><span class="label">ERROR</span><span class="badge-error">Error</span></div>
+              <div class="state-row"><span class="label">CHIP</span><span class="chip-condition">Visited domain: nike.com</span><span class="chip-condition">Last Purchase: &lt;30d</span><span class="chip-condition">+5 More</span></div>
+            </div>
+          </div>
+          <p class="tiny" style="margin-top:12px;">Seen on: <a href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html#sidebar-nav">Segmentation List</a>.</p>
+        </section>
+        </div>
+
+        <div class="content-section" id="inputs">
+        <section class="panel">
+          <p class="section-title">3. Inputs</p>
+          <h2 style="margin:0 0 4px; font-size:18px; font-weight:600;">Text, SQL, Forms &amp; Selection</h2>
+          <div class="subsection">
+            <div class="panel" id="text-inputs-sql-editor-component" style="padding:12px;">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500; color:var(--text-secondary);">Text Inputs + SQL Editor</h3>
+              <div class="state-row"><span class="label">PLACEHOLDER</span><div class="input placeholder" style="min-width:200px;">New segment</div></div>
+              <div class="state-row"><span class="label">FOCUS</span><div class="input focus" style="min-width:200px;">New segment</div></div>
+              <div class="state-row"><span class="label">ERROR</span><div class="input error" style="min-width:200px;">Segment name is required</div></div>
+              <div class="state-row"><span class="label">DISABLED</span><div class="input disabled" style="min-width:200px;">Add a description</div></div>
+              <div class="state-row" style="align-items:flex-start;">
+                <span class="label">SQL</span>
+                <div class="input textarea" style="min-width:280px;">SELECT DISTINCT device_xid FROM ? WHERE url LIKE '%checkout%' AND timestamp &gt; DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)</div>
+              </div>
+              <p class="tiny" style="margin-top:10px;">Helper text supports inline code tokens like <span class="code">?</span> for table placeholders. Seen on: <a href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html#text-inputs-sql-editor-component">Segmentation SQL</a>.</p>
+            </div>
+          </div>
+          <div class="subsection">
+            <div class="panel" id="sql-mode-toggle-component" style="padding:12px;">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500; color:var(--text-secondary);">SQL Mode Toggle</h3>
+              <div class="state-row"><span class="label">ON</span><span class="toggle-sql on"><span class="knob"></span></span><span>SQL mode</span></div>
+              <div class="state-row"><span class="label">OFF</span><span class="toggle-sql off"><span class="knob"></span></span><span>SQL mode</span></div>
+              <div class="state-row"><span class="label">FOCUS</span><span class="toggle-sql on focus"><span class="knob"></span></span><span>SQL mode</span></div>
+              <div class="state-row"><span class="label">DISABLED</span><span class="toggle-sql on" style="opacity:.45;"><span class="knob"></span></span><span style="opacity:.45;">SQL mode</span></div>
+              <p class="tiny" style="margin-top:10px;">Seen on: <a href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html#sql-mode-toggle-component">Segmentation SQL</a>, <a href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html#filters">Segmentation Filter</a>.</p>
+            </div>
+          </div>
+          <div class="grid" id="form-fields" style="margin-top:16px; grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <div class="panel" id="text-area-fields">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500;">Text Area Fields</h3>
+              <div class="field-wrap">
+                <div class="label-row">Label <span class="req">*</span></div>
+                <div class="input textarea form placeholder">Placeholder text...</div>
+              </div>
+              <div class="state-row"><span class="label">Focus</span><div class="input textarea form focus">Placeholder content</div></div>
+              <div class="state-row"><span class="label">Error</span><div class="input textarea form error">Placeholder error message</div></div>
+              <div class="state-row"><span class="label">Disabled</span><div class="input textarea form disabled">Placeholder disabled</div></div>
+              <div class="seen" style="margin-top:12px;"><a href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html#form-fields">Campaign Details</a></div>
+            </div>
+            <div class="panel" id="select-fields">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500;">Select Fields</h3>
+              <div class="field-wrap">
+                <div class="label-row">Label <span class="req">*</span></div>
+                <div class="select form">
+                  <div class="meta">
+                    <span class="main">Placeholder value</span>
+                    <span class="subtxt">Placeholder subtitle</span>
+                  </div>
+                  <span><i data-lucide="chevron-down" style="width:14px;height:14px;"></i></span>
+                </div>
+              </div>
+              <div class="field-wrap" style="margin-top:10px;">
+                <div class="label-row">Label <span class="req">*</span></div>
+                <div class="select form"><span class="inline"><span class="icon-pill"><i data-lucide="globe" style="width:12px;height:12px;"></i></span>Placeholder value</span><span><i data-lucide="chevron-down" style="width:14px;height:14px;"></i></span></div>
+              </div>
+              <div class="state-row"><span class="label">Focus</span><div class="select form" style="flex:1; border-color:var(--border-focus); box-shadow:0 0 0 3px var(--input-ring);"><span class="inline"><span class="icon-pill"><i data-lucide="globe" style="width:12px;height:12px;"></i></span>Placeholder value</span><span><i data-lucide="chevron-down" style="width:14px;height:14px;"></i></span></div></div>
+              <div class="state-row"><span class="label">Error</span><div class="select form" style="flex:1; border-color:var(--text-danger);"><span>Select placeholder...</span><span><i data-lucide="chevron-down" style="width:14px;height:14px;"></i></span></div></div>
+              <div class="seen" style="margin-top:12px;"><a href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html#form-fields">Campaign Details</a></div>
+            </div>
+          </div>
+          <div class="grid" id="incentive-cards" style="margin-top:16px; grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <div class="panel" id="incentive-cards-panel">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500;">Incentive Cards</h3>
+              <div class="inc-cards">
+                <div class="inc-card selected">
+                  <div class="inc-head"><i data-lucide="trending-up" style="width:14px;height:14px;"></i><span class="radio on"></span></div>
+                  <div class="inc-title">Placeholder title</div>
+                  <div class="inc-desc">Placeholder description</div>
+                </div>
+                <div class="inc-card">
+                  <div class="inc-head"><i data-lucide="gift" style="width:14px;height:14px;"></i><span class="radio"></span></div>
+                  <div class="inc-title">Placeholder title</div>
+                  <div class="inc-desc">Placeholder description</div>
+                </div>
+              </div>
+              <div class="seen" style="margin-top:12px;"><a href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html#incentive-cards">Campaign Incentive</a></div>
+            </div>
+            <div class="panel" id="tokenized-multi-select">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500;">Tokenized Multi-Select Inputs</h3>
+              <div class="field-wrap">
+                <div class="label-row">Label <span class="req">*</span></div>
+                <div class="token-input"><div class="chips"><span class="token-chip">Placeholder tag <i data-lucide="x" style="width:12px;height:12px;"></i></span></div></div>
+                <div class="tiny">Placeholder helper text</div>
+              </div>
+              <div class="field-wrap" style="margin-top:10px;">
+                <div class="label-row">Label <span class="req">*</span></div>
+                <div class="token-input"><div class="chips"><span class="token-chip">Placeholder tag <i data-lucide="x" style="width:12px;height:12px;"></i></span><span class="token-chip">Placeholder tag <i data-lucide="x" style="width:12px;height:12px;"></i></span><span class="token-chip">Placeholder tag <i data-lucide="x" style="width:12px;height:12px;"></i></span></div></div>
+                <div class="tiny">Placeholder helper text</div>
+              </div>
+              <div class="seen" style="margin-top:12px;"><a href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html#input-fields">Campaign Incentive</a><a href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html#atoms">Budgeting</a></div>
+            </div>
+          </div>
+          <div class="panel stack" id="date-time" style="margin-top:16px;">
+            <h3 style="margin:0 0 8px; font-size:15px; font-weight:500;">Start / End Date &amp; Time</h3>
+            <div class="field-wrap">
+              <div class="label-row">Start Date &amp; Time <span class="req">*</span></div>
+              <div class="datetime-input">Placeholder date, time <i data-lucide="calendar" style="width:14px;height:14px;"></i></div>
+            </div>
+            <div class="field-wrap">
+              <div class="label-row">End Date &amp; Time <span class="req">*</span></div>
+              <div class="datetime-input">Placeholder date, time <i data-lucide="calendar" style="width:14px;height:14px;"></i></div>
+            </div>
+            <div class="state-row"><span class="label">Focus</span><div class="datetime-input focus" style="min-width:340px;">Placeholder date, time <i data-lucide="calendar" style="width:14px;height:14px;"></i></div></div>
+            <div class="state-row"><span class="label">Error</span><div class="datetime-input error" style="min-width:340px;">Placeholder error message <i data-lucide="alert-circle" style="width:14px;height:14px;"></i></div></div>
+            <div class="seen" style="margin-top:12px;"><a href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html#date-time">Campaign Scheduling</a></div>
+          </div>
+        </section>
+        </div>
+
+        <div class="content-section" id="data">
+        <section class="panel">
+          <p class="section-title">4. Data</p>
+          <h2 style="margin:0 0 4px; font-size:18px; font-weight:600;">Metrics, Spend &amp; Progress</h2>
+          <div class="subsection" id="metric-tab-atoms" style="margin-top:12px;">
+            <p class="tiny" style="margin:0 0 10px;">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip). Figma source node: <code>226:18637</code></p>
+            <div class="grid" style="grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+              <div class="atom-card">
+                <div class="name">Active Metric Tab</div>
+                <span class="pill-tab active"><i data-lucide="eye" style="width:14px;height:14px;"></i> Impressions</span>
+              </div>
+              <div class="atom-card">
+                <div class="name">Inactive Metric Tab</div>
+                <span class="pill-tab"><i data-lucide="mouse-pointer-click" style="width:14px;height:14px;"></i> Clicks</span>
+              </div>
+              <div class="atom-card">
+                <div class="name">Bar Segment</div>
+                <div class="bar-metric"><span style="width:40%;"></span></div>
+              </div>
+              <div class="atom-card">
+                <div class="name">Value Label</div>
+                <div class="value">30.2k</div>
+              </div>
+            </div>
+            <div class="seen" style="margin-top:12px;"><a href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html#atoms">Funnel Metrics</a><a href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html#atoms">Dashboard</a><a href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html#atoms">IO Detail</a></div>
+          </div>
+          <div class="grid" style="margin-top:16px;">
+            <article class="card">
+              <h3 style="margin:0; font-size:15px; font-weight:600;">Metric Delta</h3>
+              <p class="tiny">Trend indicator (e.g. +5.7%).</p>
+              <div class="demo"><span style="color:var(--metric-green);font-size:12px;">↗ +5.7%</span></div>
+              <div class="seen"><a href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html#atoms">Dashboard</a></div>
+            </article>
+            <article class="card" id="burn-rate-chip">
+              <h3 style="margin:0; font-size:15px; font-weight:600;">Burn Rate Chip</h3>
+              <p class="tiny">Warning chip for high burn rate with daily spend.</p>
+              <div class="demo"><span class="burn-rate-chip"><span>High Burn Rate</span><span class="meta">$4.2k per day</span></span></div>
+              <div class="seen"><a href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html#atoms">IO Detail</a><a href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html#atoms">Dashboard</a></div>
+              <p class="tiny" style="margin-top:8px;">Figma: <a href="https://www.figma.com/design/KFMCF5p9j00q3T1FrYngqP/Campaign-Manager?node-id=243-21342" target="_blank" rel="noopener">243:21342</a></p>
+            </article>
+          </div>
+          <div class="grid" style="margin-top:16px;">
+            <div class="panel" id="spend-meter-states">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500;">Spend Meter States</h3>
+              <div class="state-row"><span class="label">Normal</span><div class="spend"><div class="spend-top"><span class="pct">82%</span><span class="amt">$98,420</span></div><div class="bar"><span></span></div></div></div>
+              <div class="state-row"><span class="label">High</span><div class="spend"><div class="spend-top"><span class="pct">98%</span><span class="amt">$44,120</span></div><div class="bar red"><span></span></div></div></div>
+              <div class="state-row"><span class="label">Maxed</span><div class="spend"><div class="spend-top"><span class="pct">100%</span><span class="amt">$79,985</span></div><div class="bar full"><span></span></div></div></div>
+              <div class="seen" style="margin-top:12px;"><a href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html#atoms">Campaigns</a><a href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html#atoms">Insertion Orders</a></div>
+            </div>
+          </div>
+          <div class="grid" style="margin-top:16px; grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <div class="panel" id="progress-wrap">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500;">Progress Bar (Budget &amp; Spend)</h3>
+              <div class="progress-wrap">
+                <div class="row"><span class="v">Placeholder spent <span class="k">(Placeholder %)</span></span><span class="k">Placeholder total</span></div>
+                <div class="progress-bar"><span></span></div>
+              </div>
+              <div class="seen" style="margin-top:12px;"><a href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html#budget-spend">Dashboard</a></div>
+            </div>
+            <div class="panel" id="pace-note">
+              <h3 style="margin:0 0 8px; font-size:15px; font-weight:500;">Pace Note</h3>
+              <div class="pace-note">
+                <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i>
+                Placeholder pacing message
+              </div>
+              <div class="seen" style="margin-top:12px;"><a href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html#budget-spend">Dashboard</a></div>
+            </div>
+          </div>
+        </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

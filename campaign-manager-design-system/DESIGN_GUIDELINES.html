@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Guidelines — Figma Patterns</title>
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-link: #4f46e5;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-default: #e2e8f0;
+      --tab-active-bg: #eef2ff;
+      --tab-active-text: #4338ca;
+      --tab-active-border: #4f46e5;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text-primary); background: var(--bg-page); }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail { border-right: 1px solid var(--border-default); background: var(--bg-surface); padding: 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+    .content-area { padding: 32px 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; margin: 2px 0 6px; }
+    .rail-link { display: block; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-surface); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { background: var(--tab-active-bg); color: var(--tab-active-text); border-color: var(--tab-active-border); }
+    .page { max-width: 1240px; margin: 0 auto; display: grid; gap: 16px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { margin: 0; font-size: 24px; font-weight: 700; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+    .dg-section { margin-top: 24px; }
+    .dg-section h2 { font-size: 18px; font-weight: 600; margin: 0 0 12px; }
+    .dg-section h3 { font-size: 14px; font-weight: 600; margin: 16px 0 8px; color: var(--text-secondary); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px 12px; text-align: left; }
+    th { background: var(--bg-subtle); font-weight: 600; color: var(--text-primary); }
+    .rules-list { margin: 0; padding-left: 20px; }
+    .rules-list li { margin-bottom: 8px; color: var(--text-secondary); line-height: 1.5; }
+    code { font-family: Menlo, monospace; font-size: 12px; background: var(--bg-subtle); padding: 2px 6px; border-radius: 4px; }
+    pre { background: var(--bg-subtle); padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 12px; }
+    .color-swatch { display: inline-block; width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); vertical-align: middle; margin-right: 6px; }
+    @media (max-width: 900px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link active" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#layout">Layout Architecture</a>
+        <a class="rail-link" href="#typography">Typography</a>
+        <a class="rail-link" href="#colors">Color Tokens</a>
+        <a class="rail-link" href="#spacing">Spacing &amp; Radius</a>
+        <a class="rail-link" href="#components">Component Patterns</a>
+        <a class="rail-link" href="#implementation">Implementation Notes</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <header class="panel">
+          <h1 class="title">Design Guidelines</h1>
+          <p class="sub">Design rules and layout patterns from the Campaign Manager Figma file. Use when implementing UI to faithfully recreate designs. Source: Figma file <code>KFMCF5p9j00q3T1FrYngqP</code>.</p>
+          <p class="sub" style="margin-top:8px;">See <a href="./FIGMA_LINKS.md" target="_blank" rel="noopener">FIGMA_LINKS.md</a> for direct links to specific nodes.</p>
+        </header>
+
+        <section class="panel" id="layout">
+          <h2>Layout Architecture</h2>
+          <h3>App Shell: Two-Column Layout</h3>
+          <p class="sub">Fixed left sidebar + main content structure.</p>
+          <table>
+            <thead><tr><th>Region</th><th>Width</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Sidebar</strong></td><td><code>230px</code> fixed</td><td>Global navigation, logo, primary action, user profile</td></tr>
+              <tr><td><strong>Main Content</strong></td><td><code>1218px</code> (flexible)</td><td>Page-specific content, tabs, data tables, forms</td></tr>
+            </tbody>
+          </table>
+          <p class="sub" style="margin-top:12px;">Container: full viewport, <code>rounded-[32px]</code> on root. Sidebar: <code>h-[900px]</code>, <code>p-[16px]</code>, <code>gap-[12px]</code> between sections.</p>
+          <h3>Content Hierarchy</h3>
+          <pre>Tab Bar (top)
+  └── Tabs + Settings dropdown
+Main Content (scrollable)
+  └── Page title (optional)
+  └── Data table / Form / Dashboard
+  └── Action bar (optional, bottom)</pre>
+        </section>
+
+        <section class="panel" id="typography">
+          <h2>Typography</h2>
+          <p class="sub">Font family: <strong>Inter</strong>. Source Code Pro for Billing IDs, segment names, code-like values.</p>
+          <table>
+            <thead><tr><th>Style</th><th>Size</th><th>Weight</th><th>Line Height</th><th>Use Case</th></tr></thead>
+            <tbody>
+              <tr><td>Heading/H3</td><td>20px</td><td>600</td><td>28px</td><td>Page titles</td></tr>
+              <tr><td>Heading/H4</td><td>18px</td><td>600</td><td>26px</td><td>Section headings</td></tr>
+              <tr><td>Heading/H5</td><td>16px</td><td>600</td><td>24px</td><td>Card titles, key metrics</td></tr>
+              <tr><td>Heading/H6</td><td>14px</td><td>500</td><td>20px</td><td>Column headers, labels</td></tr>
+              <tr><td>Body/Default</td><td>14px</td><td>400</td><td>22px</td><td>Body text</td></tr>
+              <tr><td>Body/Default Medium</td><td>14px</td><td>500</td><td>22px</td><td>Emphasized body, table cells</td></tr>
+              <tr><td>Body/Small</td><td>13px</td><td>400</td><td>20px</td><td>Secondary text, helper text</td></tr>
+              <tr><td>Caption/Uppercase</td><td>12px</td><td>500</td><td>16px</td><td>Section labels (e.g. BUDGET AND SPEND)</td></tr>
+              <tr><td>Caption/Default</td><td>12px</td><td>400</td><td>16px</td><td>Dates, supplementary info</td></tr>
+              <tr><td>UI/Label</td><td>14px</td><td>500</td><td>20px</td><td>Form labels</td></tr>
+              <tr><td>UI/Button Small</td><td>13px</td><td>500</td><td>20px</td><td>Tab text, small buttons</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel" id="colors">
+          <h2>Color Tokens</h2>
+          <p class="sub">Use semantic tokens; map to your design system. See <a href="./DESIGN_TOKENS.html">Tokens</a> for full reference.</p>
+          <h3>Status &amp; Accent</h3>
+          <table>
+            <thead><tr><th>State</th><th>Background</th><th>Text</th></tr></thead>
+            <tbody>
+              <tr><td>Active</td><td><span class="color-swatch" style="background:#d2f0df"></span>#d2f0df</td><td>#11552f</td></tr>
+              <tr><td>Inactive/Ended</td><td>#e2e8f0</td><td>#475569</td></tr>
+              <tr><td>Processing</td><td>#f1f5f9</td><td>#475569</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel" id="spacing">
+          <h2>Spacing &amp; Border Radius</h2>
+          <h3>Spacing System</h3>
+          <table>
+            <thead><tr><th>Value</th><th>Usage</th></tr></thead>
+            <tbody>
+              <tr><td><code>4px</code></td><td>Gap between badges, label + asterisk</td></tr>
+              <tr><td><code>8px</code></td><td>Nav item padding, badge padding, icon gaps</td></tr>
+              <tr><td><code>12px</code></td><td>Row padding, section gaps</td></tr>
+              <tr><td><code>16px</code></td><td>Sidebar padding, section padding, tab bar</td></tr>
+              <tr><td><code>24px</code></td><td>Form section gaps, card padding</td></tr>
+              <tr><td><code>32px</code></td><td>Table row horizontal padding, column gaps</td></tr>
+              <tr><td><code>48px</code></td><td>Child row indent (hierarchy)</td></tr>
+            </tbody>
+          </table>
+          <h3>Border Radius</h3>
+          <table>
+            <thead><tr><th>Value</th><th>Usage</th></tr></thead>
+            <tbody>
+              <tr><td><code>6px</code></td><td>Primary/secondary buttons</td></tr>
+              <tr><td><code>8px</code></td><td>Inputs, badges, nav items, dropdowns, tabs</td></tr>
+              <tr><td><code>16px</code></td><td>Progress bars, cards, alert banners</td></tr>
+              <tr><td><code>32px</code></td><td>+ Create pill button, root container</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel" id="components">
+          <h2>Component Patterns</h2>
+          <h3>Sidebar</h3>
+          <p class="sub">Width 230px. Sections: Logo area → Create row (+ Create pill + chevrons) → Navigation (gap 8px) → Spacer → User profile. Nav active: <code>bg-[#f1f5f9]</code>, font-medium. Inactive: font-normal, <code>text-[--color/slate/600]</code>.</p>
+          <h3>Tab Bar</h3>
+          <p class="sub"><code>px-[32px] py-[16px]</code>, border-b. Tabs: gap 4px, each <code>px-[10px] py-[8px] rounded-[8px]</code>. Active: border #d9d9d9. Settings dropdown: <code>bg-[--bg/subtle]</code>, right-aligned.</p>
+          <h3>Data Table Rows</h3>
+          <p class="sub">Header: py-12px. Data: py-20px (Segments) or py-24px (Campaigns), px-32px. Hierarchy: child rows <code>pl-[48px]</code> + 2px indigo bar. Row actions: 4×16px ellipsis on far right.</p>
+          <h3>Status Badges</h3>
+          <p class="sub"><code>rounded-[8px] px-[8px] py-[2px]</code>. Active: bg #d2f0df, text #11552f. Inactive: bg slate/200, text slate/600. Condition badges: bg slate/100, text 13px.</p>
+          <h3>Form Inputs</h3>
+          <p class="sub">Label: font-medium 14px, text-secondary. Required: red asterisk. Input: border slate/300, rounded-8px, px-16px py-12px.</p>
+          <h3>Action Bar (Bottom)</h3>
+          <p class="sub">Fixed bottom, border-t. px-24px py-16px, justify-between. Left: Cancel (text #595959). Right: Step indicator + Primary button (bg overlay, white text, rounded-6px).</p>
+          <h3>Progress Bar</h3>
+          <p class="sub">Track: bg-subtle, h-6px or h-12px, rounded-12px/16px. Fill: fg-primary or fg-secondary or red for over-budget.</p>
+          <h3>Icon Sizes</h3>
+          <p class="sub">12px (small inline), 14px (nav), 16px (alert, chevron), 20px (active nav), 24px (sidebar chevrons), 32px (avatar).</p>
+        </section>
+
+        <section class="panel" id="implementation">
+          <h2>Implementation Notes for Coding Agents</h2>
+          <ul class="rules-list">
+            <li><strong>Convert Tailwind to project stack.</strong> Map Figma MCP output to your design system (CSS variables, theme, styled-components).</li>
+            <li><strong>Preserve exact values.</strong> Use specified px for spacing, font sizes, colors. Avoid arbitrary rounding.</li>
+            <li><strong>Reuse shared components.</strong> Sidebar, NavItem, TabBar, Badges, form fields appear across screens. Extract them.</li>
+            <li><strong>Hierarchy in tables.</strong> Parent/child rows use pl-48px and 2px vertical bar. Maintain for segment/campaign hierarchies.</li>
+            <li><strong>Responsive behavior.</strong> Design uses fixed widths. Consider breakpoints (e.g. collapsible sidebar).</li>
+            <li><strong>Asset URLs.</strong> Figma MCP asset URLs expire after 7 days. Download and commit icons, or use icon library.</li>
+          </ul>
+        </section>
+
+        <section class="panel">
+          <h2>Figma Node Reference</h2>
+          <table>
+            <thead><tr><th>Screen/Component</th><th>Node ID</th></tr></thead>
+            <tbody>
+              <tr><td>View Segment (All Segments list)</td><td>226:12430</td></tr>
+              <tr><td>New Segment (create form)</td><td>226:12560</td></tr>
+              <tr><td>View All Campaigns</td><td>198:3741</td></tr>
+              <tr><td>Campaign Details (form)</td><td>37:4065</td></tr>
+              <tr><td>Budget and Spend</td><td>232:20000</td></tr>
+              <tr><td>Tab Component Set</td><td>303:2</td></tr>
+            </tbody>
+          </table>
+          <p class="sub" style="margin-top:8px;">Full list: <a href="./FIGMA_LINKS.md">FIGMA_LINKS.md</a></p>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

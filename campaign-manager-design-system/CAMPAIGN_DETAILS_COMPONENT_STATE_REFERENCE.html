@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Details Component + State Reference</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-danger: #dc2626;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-overlay: #0f172a;
+      --border-default: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+      --tab-active-bg: #eef2ff;
+      --tab-active-border: #4f46e5;
+      --tab-default-border: #d9d9d9;
+      --input-ring: rgba(99, 102, 241, 0.2);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text-primary); background: var(--bg-page); }
+    h1, h2, p { margin: 0; }
+    .storybook-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .left-rail { border-right: 1px solid var(--border-default); background: var(--bg-surface); padding: 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+    .content-area { padding: 24px; }
+    .rail-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .rail-group { display: grid; gap: 6px; margin-bottom: 16px; }
+    .rail-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 2px 0 6px; }
+    .rail-link { display: block; border: 1px solid var(--border-default); border-radius: 8px; padding: 8px 10px; background: var(--bg-surface); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .rail-link:hover { background: var(--bg-subtle); }
+    .rail-link.active { border-color: var(--tab-active-border); background: var(--tab-active-bg); color: var(--text-primary); }
+    .page { max-width: 1400px; margin: 0 auto; display: grid; gap: 20px; }
+    .panel { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 12px; padding: 16px; }
+    .title { font-size: 22px; font-weight: 600; }
+    .sub { margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+    .tiny { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .state-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+    .label { min-width: 88px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; font-weight: 500; }
+    .tab { border: 1px solid var(--tab-default-border); border-radius: 8px; padding: 8px 10px; background: #fff; color: var(--text-primary); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+    .tab.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .tab.disabled { opacity: .45; }
+    .settings { background: var(--bg-subtle); }
+    .field-wrap { display: grid; gap: 4px; width: 100%; }
+    .label-row { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+    .label-row .req { color: var(--text-danger); }
+    .input {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+    .input.textarea { min-height: 86px; color: #334155; }
+    .input.placeholder { color: #6b7280; }
+    .input.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .input.error { border-color: var(--text-danger); }
+    .input.disabled { opacity: .45; background: var(--bg-subtle); }
+    .select {
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 42px;
+    }
+    .select .meta { display: grid; gap: 2px; }
+    .meta .main { font-size: 14px; color: var(--text-primary); }
+    .meta .subtxt { font-size: 12px; color: var(--text-secondary); }
+    .icon-pill {
+      width: 22px; height: 22px; border-radius: 8px; background: var(--bg-subtle);
+      display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary);
+      font-size: 12px; margin-right: 8px;
+    }
+    .inline { display: inline-flex; align-items: center; }
+    .footer {
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn { border-radius: 6px; border: 1px solid transparent; padding: 10px 24px; font-size: 14px; font-weight: 500; background: transparent; color: #595959; }
+    .btn.primary { background: var(--bg-overlay); color: #fff; display: inline-flex; align-items: center; gap: 8px; }
+    .btn.focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--input-ring); }
+    .btn.disabled { opacity: .45; }
+    .step { text-align: right; font-size: 14px; font-weight: 500; }
+    .step small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+    .iconoir, .lucide-icon, .lucide { width: 14px; height: 14px; stroke-width: 2; vertical-align: middle; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--border-default); padding: 8px; text-align: left; }
+    th { background: var(--bg-subtle); color: var(--text-secondary); font-weight: 600; }
+    @media (max-width: 1080px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) {
+      .storybook-layout { grid-template-columns: 1fr; }
+      .left-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border-default); }
+      .content-area { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="storybook-layout">
+    <aside class="left-rail">
+      <div class="rail-title">Component Storybook</div>
+      <div class="rail-group">
+        <div class="rail-label">Library</div>
+        <a class="rail-link" href="./COMPONENT_STORYBOOK.html">Storybook Home</a>
+        <a class="rail-link" href="./DESIGN_TOKENS.html">Tokens</a>
+        <a class="rail-link" href="./DESIGN_GUIDELINES.html">Design Guidelines</a>
+        <a class="rail-link" href="./GLOBAL_ATOMS_COMPONENT_LIBRARY.html">Global Atoms</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Segmentation</div>
+        <a class="rail-link" href="./SEGMENTATION_COMPONENT_STATE_REFERENCE.html">Segmentation List</a>
+        <a class="rail-link" href="./SEGMENTATION_SQL_COMPONENT_STATE_REFERENCE.html">Segmentation SQL</a>
+        <a class="rail-link" href="./SEGMENTATION_FILTER_COMPONENT_STATE_REFERENCE.html">Segmentation Filters</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Campaign Builder</div>
+        <a class="rail-link" href="./CAMPAIGNS_COMPONENT_STATE_REFERENCE.html">Campaigns List</a>
+        <a class="rail-link active" href="./CAMPAIGN_DETAILS_COMPONENT_STATE_REFERENCE.html">Campaign Details</a>
+        <a class="rail-link" href="./CAMPAIGN_INCENTIVE_COMPONENT_STATE_REFERENCE.html">Campaign Incentive</a>
+        <a class="rail-link" href="./CAMPAIGN_MESSAGING_COMPONENT_STATE_REFERENCE.html">Campaign Messaging</a>
+        <a class="rail-link" href="./CAMPAIGN_TEMPLATE_EDITOR_COMPONENT_STATE_REFERENCE.html">Template Editor</a>
+        <a class="rail-link" href="./CAMPAIGN_SCHEDULING_COMPONENT_STATE_REFERENCE.html">Scheduling</a>
+        <a class="rail-link" href="./CAMPAIGN_BUDGETING_COMPONENT_STATE_REFERENCE.html">Budgeting</a>
+        <a class="rail-link" href="./CAMPAIGN_REVIEW_LAUNCH_COMPONENT_STATE_REFERENCE.html">Review &amp; Launch</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">Reporting</div>
+        <a class="rail-link" href="./CAMPAIGN_DETAIL_DASHBOARD_COMPONENT_STATE_REFERENCE.html">Detail Dashboard</a>
+        <a class="rail-link" href="./INSERTION_ORDERS_COMPONENT_STATE_REFERENCE.html">Insertion Orders</a>
+        <a class="rail-link" href="./INSERTION_ORDER_DETAIL_COMPONENT_STATE_REFERENCE.html">Insertion Order Detail</a>
+        <a class="rail-link" href="./FUNNEL_METRICS_COMPONENT_STATE_REFERENCE.html">Funnel Metrics</a>
+      </div>
+      <div class="rail-group">
+        <div class="rail-label">On This Page</div>
+        <a class="rail-link" href="#top-nav">Top Navigation</a>
+        <a class="rail-link" href="#form-fields">Form Fields</a>
+        <a class="rail-link" href="#footer-actions">Footer Actions</a>
+        <a class="rail-link" href="#atoms">Atoms</a>
+        <a class="rail-link" href="#molecules">Molecules</a>
+        <a class="rail-link" href="#compositions">Compositions</a>
+        <a class="rail-link" href="#state-matrix">State Matrix</a>
+      </div>
+    </aside>
+    <main class="content-area">
+      <div class="page">
+        <section class="panel">
+          <h1 class="title">Campaign Manager - Campaign Details Step Reference</h1>
+          <p class="sub">Source: Figma node `37:4065` (Campaign Details, step 1 of 6).</p>
+          <p class="tiny">Includes required-form labels, textarea fields, select controls, top nav tabs/settings, and step footer actions.</p>
+        </section>
+
+        <section class="grid" id="top-nav">
+          <div class="panel">
+            <h2>Top Tabs + Settings</h2>
+            <div class="state-row"><span class="label">Default</span><span class="tab">All Campaigns</span><span class="tab">New Campaign</span><span class="tab">+</span><span class="tab settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            <div class="state-row"><span class="label">Focus</span><span class="tab focus">New Campaign</span><span class="tab focus settings">Settings <i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            <div class="state-row"><span class="label">Disabled</span><span class="tab disabled">New Campaign</span></div>
+          </div>
+          <div class="panel">
+            <h2>Section Heading</h2>
+            <div class="state-row"><span class="label">Default</span><strong>Campaign Details</strong></div>
+          </div>
+        </section>
+
+        <section class="grid" id="form-fields">
+          <div class="panel">
+            <h2>Text Area Fields</h2>
+            <div class="field-wrap">
+              <div class="label-row">Campaign Name <span class="req">*</span></div>
+              <div class="input textarea placeholder">Enter multiline text...</div>
+            </div>
+            <div class="state-row"><span class="label">Focus</span><div class="input textarea focus">Campaign name content</div></div>
+            <div class="state-row"><span class="label">Error</span><div class="input textarea error">Required field</div></div>
+            <div class="state-row"><span class="label">Disabled</span><div class="input textarea disabled">Enter multiline text...</div></div>
+          </div>
+
+          <div class="panel">
+            <h2>Select Fields</h2>
+            <div class="field-wrap">
+              <div class="label-row">User segment <span class="req">*</span></div>
+              <div class="select">
+                <div class="meta">
+                  <span class="main">Really Long Segment Name</span>
+                  <span class="subtxt">Estimated Audience: ~20,420 users</span>
+                </div>
+                <span><i class="iconoir iconoir-nav-arrow-down"></i></span>
+              </div>
+            </div>
+            <div class="field-wrap" style="margin-top:10px;">
+              <div class="label-row">Partner Type <span class="req">*</span></div>
+              <div class="select"><span class="inline"><span class="icon-pill"><i class="iconoir iconoir-globe"></i></span>Turn-Key</span><span><i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            </div>
+            <div class="field-wrap" style="margin-top:10px;">
+              <div class="label-row">Placement Type <span class="req">*</span></div>
+              <div class="select"><span class="inline"><span class="icon-pill"><i class="iconoir iconoir-globe"></i></span>EMA</span><span><i class="iconoir iconoir-nav-arrow-down"></i></span></div>
+            </div>
+            <div class="state-row"><span class="label">Focus</span><div class="select" style="flex:1; border-color:var(--border-focus); box-shadow:0 0 0 3px var(--input-ring);"><span class="inline"><span class="icon-pill"><i class="iconoir iconoir-globe"></i></span>EMA</span><span><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+            <div class="state-row"><span class="label">Error</span><div class="select" style="flex:1; border-color:var(--text-danger);"><span>Select value</span><span><i class="iconoir iconoir-nav-arrow-down"></i></span></div></div>
+          </div>
+        </section>
+
+        <section class="panel" id="footer-actions">
+          <h2>Footer Actions + Step Indicator</h2>
+          <div class="footer">
+            <button class="btn">Cancel</button>
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div class="step">Step 1 of 6<small>Next Step: Configure Incentive</small></div>
+              <button class="btn primary">Next <i class="iconoir iconoir-nav-arrow-right"></i></button>
+            </div>
+          </div>
+          <div class="state-row"><span class="label">Focus</span><button class="btn focus">Cancel</button><button class="btn primary focus">Next <i class="iconoir iconoir-nav-arrow-right"></i></button></div>
+          <div class="state-row"><span class="label">Disabled</span><button class="btn disabled">Cancel</button><button class="btn primary disabled">Next <i class="iconoir iconoir-nav-arrow-right"></i></button></div>
+        </section>
+
+        <section class="grid">
+          <article class="panel" id="atoms">
+            <h2>Atoms</h2>
+            <p class="tiny">Rule: a single primitive UI element (button, input, tab, badge, icon, or chip).</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source nodes: <code>37:4065</code>, <code>37:4066</code></p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px;">
+              <span class="tab active">Campaign Details</span>
+              <input type="text" value="Campaign Name" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              <input type="text" value="Really Long Segment Name" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+              <button class="btn">Cancel</button>
+              <button class="btn primary">Next</button>
+            </div>
+            <ul class="tiny">
+              <li>Tab atoms ("All Campaigns", "New Campaign", "+")</li>
+              <li>Required label + asterisk atoms</li>
+              <li>Text input atoms (campaign name, description)</li>
+              <li>Select field atoms (user segment, partner type, placement type)</li>
+              <li>Chevron-down icon atoms in select controls</li>
+              <li>Footer action atoms and step-indicator text atoms</li>
+            </ul>
+          </article>
+          <article class="panel" id="molecules">
+            <h2>Molecules</h2>
+            <p class="tiny">Rule: a small reusable grouping of two or more atoms that work together.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source nodes: <code>37:4065</code>, <code>37:4066</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:10px; margin:8px 0 10px;">
+              <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Labeled Field Molecule</div>
+              <label style="display:block; font-size:12px; margin-bottom:6px;">User segment *</label>
+              <div class="select">Really Long Segment Name <span><i data-lucide="chevron-down" style="width:14px;height:14px;"></i></span></div>
+            </div>
+            <ul class="tiny">
+              <li>Labeled field molecule (label + required marker + control)</li>
+              <li>Select-row molecule with leading icon + value + chevron</li>
+              <li>Details form section molecule (stack of field molecules)</li>
+              <li>Footer progression molecule (step counter + next-step helper + actions)</li>
+            </ul>
+          </article>
+          <article class="panel" id="compositions">
+            <h2>Compositions</h2>
+            <p class="tiny">Rule: assembled page sections composed of multiple molecules.</p>
+            <p class="tiny">Design system: <a href="DESIGN_SYSTEM.md" target="_blank" rel="noopener">DESIGN_SYSTEM.md</a></p>
+            <p class="tiny">Figma source nodes: <code>37:4065</code>, <code>37:4066</code></p>
+            <div style="border:1px solid var(--border-default); border-radius:10px; padding:12px; margin-top:8px;">
+              <div style="font-weight:600; margin-bottom:8px;">Campaign Details Step Composition</div>
+              <div style="display:grid; gap:8px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;"><span class="tab active">New Campaign</span><button class="btn">Settings</button></div>
+                <input type="text" value="Campaign Name" style="border:1px solid var(--border-default); border-radius:8px; padding:8px 10px; background:var(--bg-surface); color:var(--text-primary);" />
+                <div class="select">Turn-Key <span><i data-lucide="chevron-down" style="width:14px;height:14px;"></i></span></div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel" id="state-matrix">
+          <h2>State Coverage Matrix</h2>
+          <table>
+            <thead>
+              <tr><th>Component</th><th>Default</th><th>Hover</th><th>Active/Selected</th><th>Focus</th><th>Disabled</th><th>Error</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Top Tabs</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Settings Trigger</td><td>Yes</td><td>Yes</td><td>Open</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Campaign Name Textarea</td><td>Yes</td><td>Yes</td><td>Typing</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Description Textarea</td><td>Yes</td><td>Yes</td><td>Typing</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>User Segment Select</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Partner Type Select</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Placement Type Select</td><td>Yes</td><td>Yes</td><td>Selected</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Footer Actions</td><td>Yes</td><td>Yes</td><td>Pressed</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+              <tr><td>Step Indicator</td><td>Yes</td><td>N/A</td><td>Step progression</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./lucide-migration.js"></script>
+</body>
+</html>
